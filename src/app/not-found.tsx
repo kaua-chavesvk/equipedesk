@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main className="auth-page"><section className="auth-card"><span className="eyebrow">ESPAÇO NÃO ENCONTRADO</span><h1>Este caminho não está disponível.</h1><p className="muted" style={{margin:'20px 0'}}>Verifique o endereço ou escolha uma empresa à qual você tem acesso.</p><Link className="button primary" href="/onboarding">Escolher empresa</Link></section></main>}

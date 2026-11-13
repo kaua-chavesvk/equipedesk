@@ -1,0 +1,12 @@
+allowBuilds:
+  supabase: true
+  esbuild: true
+  sharp: true
+
+minimumReleaseAgeExclude:
+  - tar@7.5.23
+
+overrides:
+  tar: 7.5.23
+  zod: 4.6.7
+  minimatch@10.2.6: 11.0.8

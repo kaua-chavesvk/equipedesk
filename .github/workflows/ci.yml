@@ -1,0 +1,60 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=moderate
+      - run: node scripts/scan-secrets.mjs --require-history
+      - run: node scripts/check-legal.mjs
+      - run: pnpm exec supabase start
+      - run: pnpm exec supabase db reset --local
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm exec supabase test db
+      - name: Verify RLS through authenticated Data API
+        shell: bash
+        run: |
+          pnpm exec supabase status -o env > "$RUNNER_TEMP/supabase-local.env"
+          set -a
+          source "$RUNNER_TEMP/supabase-local.env"
+          set +a
+          export NEXT_PUBLIC_SUPABASE_URL="$API_URL"
+          export NEXT_PUBLIC_SUPABASE_ANON_KEY="$ANON_KEY"
+          export SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+          node scripts/seed-demo.mjs
+          node scripts/test-data-api.mjs
+      - run: pnpm build
+        env:
+          DEMO_MODE: 'true'
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env:
+          DEMO_MODE: 'true'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-traces
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+      - run: pnpm exec supabase stop --no-backup
+        if: always()

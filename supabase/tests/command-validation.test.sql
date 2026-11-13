@@ -1,0 +1,15 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(4);
+insert into auth.users(id,email,email_confirmed_at) values ('93000000-0000-4000-8000-000000000001','validate@test.local',now());
+set local role authenticated;
+select set_config('request.jwt.claim.sub','93000000-0000-4000-8000-000000000001',true);
+select throws_ok($$select public.desk_command('','create_organization','{"name":"Valid","slug":"valid","role":"admin"}')$$,'P0001','422:Campos desconhecidos.','Rejeita campos privilegiados desconhecidos via RPC direta');
+select throws_ok($$select public.desk_command('','create_organization','[]')$$,'P0001','422:Payload inválido.','Rejeita payload não objeto');
+select is((select count(*)::integer from public.organizations),0,'Falha não cria empresa ou vínculo');
+reset role;
+insert into private.command_rate(user_id,window_start,attempts) values('93000000-0000-4000-8000-000000000001',date_trunc('minute',now()),120);
+set local role authenticated;
+select throws_ok($$select public.desk_command('','create_organization','{"name":"Valid","slug":"valid"}')$$,'P0001','429:Muitas operações. Aguarde um minuto.','Limita chamadas diretas à API de dados por usuário');
+select * from finish();
+rollback;
