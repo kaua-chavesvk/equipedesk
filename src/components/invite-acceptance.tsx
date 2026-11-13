@@ -2,6 +2,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 const subscribe = () => () => {};
 
@@ -27,6 +28,7 @@ export function InviteAcceptance({ token, company, role, loginRequired, unavaila
       if (typeof result.slug !== 'string' || !/^[a-z0-9][a-z0-9-]{1,59}$/.test(result.slug)) {
         throw new Error('Não foi possível abrir a empresa. Acesse seus espaços de trabalho.');
       }
+      toast.success('Convite aceito.');
       router.replace(`/e/${result.slug}`);
       router.refresh();
     } catch (error) {

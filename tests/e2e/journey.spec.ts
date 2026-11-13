@@ -23,11 +23,12 @@ test('abre, comenta, assume, resolve e reabre um chamado', async ({page},testInf
   await expect(page.getByText('Confirmei os dados da solicitação.',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Assumir chamado'}).click();
   await expect(page.getByRole('button',{name:'Resolver chamado'})).toBeVisible();
-  page.once('dialog',dialog=>dialog.accept());
   await page.getByRole('button',{name:'Resolver chamado'}).click();
+  await page.getByRole('button',{name:'Confirmar resolução'}).click();
   await expect(page.getByRole('button',{name:'Reabrir chamado'})).toBeVisible();
-  page.once('dialog',dialog=>dialog.accept('O acesso continua indisponível.'));
   await page.getByRole('button',{name:'Reabrir chamado'}).click();
+  await page.getByLabel('Motivo da reabertura').fill('O acesso continua indisponível.');
+  await page.getByRole('button',{name:'Confirmar reabertura'}).click();
   await expect(page.getByRole('button',{name:'Assumir chamado'})).toBeVisible();
 });
 

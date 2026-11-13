@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Entrance } from './entrance';
 import { useRouter } from 'next/navigation';
 import { useState, useSyncExternalStore, type FormEvent } from 'react';
 import { ArrowRight, Check, Eye, EyeOff, Layers3, LoaderCircle, Ticket, Users, MessagesSquare } from 'lucide-react';
@@ -78,7 +79,7 @@ export function AuthForm({ mode, allowDemo = false }: { mode: Mode; token?: stri
       <p className="auth-intro-footer">EquipeDesk <span>Atendimento da sua equipe</span></p>
     </div>
     <div className="auth-form-area">
-      <section className="auth-card" aria-labelledby="auth-title">
+      <Entrance><section className="auth-card" aria-labelledby="auth-title">
         <p className="eyebrow">{mode === 'empresa' ? 'Espaço de trabalho' : 'Sua conta'}</p>
         <h1 id="auth-title">{content.title}</h1>
         <p className="muted">{content.description}</p>
@@ -97,7 +98,7 @@ export function AuthForm({ mode, allowDemo = false }: { mode: Mode; token?: stri
         </form>
         <div className="auth-links">{mode === 'login' ? <p>Ainda não tem conta? <Link href="/cadastro">Criar conta</Link></p> : <Link href="/login">Voltar para o login</Link>}</div>
         {allowDemo && <div className="demo-option"><p>Quer conhecer a interface antes?</p><button className="demo-link" disabled={demoBusy || busy} onClick={openDemo}>{demoBusy ? 'Abrindo demonstração…' : 'Conhecer a demonstração'}<ArrowRight size={16} aria-hidden="true" /></button><small>A demonstração usa dados fictícios.</small></div>}
-      </section>
+      </section></Entrance>
     </div>
   </main>;
 }

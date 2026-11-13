@@ -215,3 +215,13 @@ As migrações `202611120003_privacy.sql` e `202611120004_retention.sql` já for
 - Cobrança, assinaturas, anexos, IA e disparos de marketing permanecem fora da entrega atual.
 
 O roteiro detalhado e os critérios de aceite estão em [tarefas](docs/tasks.md). A publicação do site e a criação do administrador estão concluídas; os testes completos de uso e isolamento permanecem pendentes.
+
+## Interação e conforto no uso diário
+
+A interface oferece visualizações Lista e Kanban, tema claro/escuro/sistema no rodapé e navegação inferior em telas pequenas. O Kanban exibe os chamados da página atual e respeita os filtros e a paginação da fila. Arraste no computador ou use os botões de ação no teclado e no toque; resolução e reabertura pedem confirmação, e a reabertura exige motivo.
+
+As transições de chamados atualizam a interface imediatamente. Uma recusa do servidor restaura o estado anterior, informa o erro por toast e atualiza a fila. A API continua validando permissão, estado e versão do chamado. O comportamento foi coberto por teste de resposta concorrente 409; a demonstração não substitui testes de concorrência no PostgreSQL.
+
+Use Ctrl/Cmd + K para abrir os atalhos. No workspace, a busca encontra empresas, ações e chamados da página carregada; também oferece busca na fila completa ou abertura por UUID. Fora dele, oferece os espaços de trabalho e a central de dados. Tab, setas e Enter permitem operar a paleta pelo teclado.
+
+Os diálogos usam Radix UI para foco e fechamento por Escape. As animações respeitam a preferência por movimento reduzido, e o carregamento do workspace usa skeletons. Sonner apresenta os retornos de ações; next-themes mantém a escolha de tema no navegador e recebe o nonce da política CSP.

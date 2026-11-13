@@ -74,3 +74,13 @@ O [relatório de segurança](security-report.md) registra os 21 itens solicitado
 - Perfis, gestão de convites pendentes, entrega real de e-mails, configuração hospedada de callbacks, testes de volume e rede lenta com sessão real permanecem pendentes.
 - Retenção, restauração, monitoramento externo e alertas de Redis, HTTP 503, autenticação e latência dependem de ambiente e acesso apropriados. A revisão de identificação e contratos requer os dados do titular.
 - EquipeDesk é a marca exibida no produto. O domínio e o nome do projeto Vercel são identificadores de infraestrutura da instalação existente. O slug da empresa identifica seu espaço.
+
+## Conforto e interação — 13/11/2026
+
+- Tema claro, escuro e sistema com preferência persistida e nonce CSP; seletor sem divergência de hidratação.
+- Lista/Kanban na fila paginada, arraste por ID do chamado no computador e ações equivalentes por botão para toque e teclado.
+- Transições otimistas com controle de versão, reversão em falha e atualização da fila. Resolução/reabertura usam diálogo acessível; o motivo continua obrigatório na reabertura.
+- Paleta Ctrl/Cmd + K, navegação inferior móvel, skeletons, toasts e animações com respeito a movimento reduzido.
+- README e inventário de licenças atualizados. Capturas em `artifacts/workspace-kanban-dark-desktop.png` e `artifacts/workspace-dark-mobile.png`.
+- Verificações concluídas: 81 testes unitários em 13 arquivos, lint, tipos, auditoria sem vulnerabilidades conhecidas, documentos legais e varredura de segredos. Build de prévia Vercel concluído (`dpl_44z1ZZVUbszb1vwM5ghgzoELF7EA`).
+- Os testes focados de reversão, paleta, tema e arraste passaram em desktop e celular (arraste físico somente desktop, com alternativa por botão no toque). Uma rodada completa foi interrompida por pausa prolongada e escassez de memória do computador; a repetição está em andamento. Testes de demonstração não comprovam RLS ou concorrência em PostgreSQL real.

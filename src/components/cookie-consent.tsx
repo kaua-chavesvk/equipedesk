@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ThemeSelect } from './ui-providers';
 
 export function LegalFooter() {
   return <footer className="legal-footer">
@@ -6,5 +7,6 @@ export function LegalFooter() {
     <Link href="/termos">Termos de uso</Link>
     <Link href="/meus-dados">Meus dados</Link>
     <Link href="/licencas">Licenças</Link>
+    <ThemeSelect />
   </footer>;
 }

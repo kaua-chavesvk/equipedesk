@@ -234,6 +234,150 @@
     "noticeFilesFound": 2
   },
   {
+    "name": "@radix-ui/primitive",
+    "versions": [
+      "1.2.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-compose-refs",
+    "versions": [
+      "1.1.5"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-context",
+    "versions": [
+      "1.3.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-dialog",
+    "versions": [
+      "1.3.1"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-dismissable-layer",
+    "versions": [
+      "1.2.1"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-focus-guards",
+    "versions": [
+      "1.2.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-focus-scope",
+    "versions": [
+      "1.3.1"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-id",
+    "versions": [
+      "1.1.4"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-portal",
+    "versions": [
+      "1.2.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-presence",
+    "versions": [
+      "1.1.11"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-primitive",
+    "versions": [
+      "2.2.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-slot",
+    "versions": [
+      "1.5.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-use-callback-ref",
+    "versions": [
+      "1.1.5"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-use-controllable-state",
+    "versions": [
+      "1.3.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-use-effect-event",
+    "versions": [
+      "0.0.5"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@radix-ui/react-use-layout-effect",
+    "versions": [
+      "1.1.4"
+    ],
+    "license": "MIT",
+    "homepage": "https://radix-ui.com/primitives",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "@supabase/auth-js",
     "versions": [
       "2.119.0"
@@ -324,6 +468,33 @@
     "noticeFilesFound": 1
   },
   {
+    "name": "@types/react",
+    "versions": [
+      "19.2.7"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "@types/react-dom",
+    "versions": [
+      "19.2.3"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-dom",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "aria-hidden",
+    "versions": [
+      "1.2.6"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/aria-hidden#readme",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "baseline-browser-mapping",
     "versions": [
       "2.11.35"
@@ -378,6 +549,15 @@
     "noticeFilesFound": 1
   },
   {
+    "name": "csstype",
+    "versions": [
+      "3.2.3"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/frenic/csstype#readme",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "debug",
     "versions": [
       "4.4.3"
@@ -393,6 +573,15 @@
     ],
     "license": "Apache-2.0",
     "homepage": "https://github.com/lovell/detect-libc#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "detect-node-es",
+    "versions": [
+      "1.1.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/thekashey/detect-node",
     "noticeFilesFound": 1
   },
   {
@@ -414,12 +603,30 @@
     "noticeFilesFound": 1
   },
   {
+    "name": "framer-motion",
+    "versions": [
+      "14.13.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/motiondivision/motion#readme",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "gensync",
     "versions": [
       "1.0.0-beta.2"
     ],
     "license": "MIT",
     "homepage": "https://github.com/loganfsmyth/gensync",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "get-nonce",
+    "versions": [
+      "1.0.1"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/get-nonce",
     "noticeFilesFound": 1
   },
   {
@@ -486,6 +693,33 @@
     "noticeFilesFound": 1
   },
   {
+    "name": "motion",
+    "versions": [
+      "14.13.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/motiondivision/motion#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "motion-dom",
+    "versions": [
+      "14.13.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/motiondivision/motion#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "motion-utils",
+    "versions": [
+      "14.7.0"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/motiondivision/motion#readme",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "ms",
     "versions": [
       "2.1.3"
@@ -510,6 +744,15 @@
     ],
     "license": "MIT",
     "homepage": "https://nextjs.org",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "next-themes",
+    "versions": [
+      "0.4.6"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/pacocoursey/next-themes#readme",
     "noticeFilesFound": 1
   },
   {
@@ -576,6 +819,33 @@
     "noticeFilesFound": 1
   },
   {
+    "name": "react-remove-scroll",
+    "versions": [
+      "2.7.2"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/react-remove-scroll#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "react-remove-scroll-bar",
+    "versions": [
+      "2.3.8"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/react-remove-scroll-bar#readme",
+    "noticeFilesFound": 0
+  },
+  {
+    "name": "react-style-singleton",
+    "versions": [
+      "2.2.3"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/react-style-singleton#readme",
+    "noticeFilesFound": 1
+  },
+  {
     "name": "scheduler",
     "versions": [
       "0.28.0"
@@ -601,6 +871,15 @@
     ],
     "license": "Apache-2.0",
     "homepage": "https://sharp.pixelplumbing.com",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "sonner",
+    "versions": [
+      "2.0.8"
+    ],
+    "license": "MIT",
+    "homepage": "https://sonner.emilkowal.ski/",
     "noticeFilesFound": 1
   },
   {
@@ -656,6 +935,24 @@
     ],
     "license": "MIT",
     "homepage": "https://github.com/browserslist/update-db#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "use-callback-ref",
+    "versions": [
+      "1.3.3"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/use-callback-ref#readme",
+    "noticeFilesFound": 1
+  },
+  {
+    "name": "use-sidecar",
+    "versions": [
+      "1.1.3"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/theKashey/use-sidecar",
     "noticeFilesFound": 1
   },
   {
