@@ -1,3 +1,4 @@
+import { observeApi } from '@/lib/http/observe-api';
 import { securityEvent } from '@/lib/security';
 import { readJson } from '@/lib/http/read-json';
 import { NextResponse } from 'next/server';
@@ -6,7 +7,7 @@ import { configured, supabaseServer } from '@/lib/supabase/server';
 import { initializeDemo } from '@/lib/data';
 import { failure, HttpError } from '@/lib/http/api';
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const input = authInput.parse(await readJson(request));
     if (input.action === 'demo') {
@@ -58,3 +59,5 @@ export async function POST(request: Request) {
     return failure(error);
   }
 }
+
+export const POST = observeApi('/api/auth', handlePOST);

@@ -1,3 +1,4 @@
+import { observeApi } from '@/lib/http/observe-api';
 import { NextResponse } from 'next/server';
 import { supabaseServer, configured } from '@/lib/supabase/server';
 import { failure, HttpError } from '@/lib/http/api';
@@ -11,7 +12,7 @@ async function session(){
   if(error||!user)throw new HttpError(401,'Sessão ausente.');
   return {db,user};
 }
-export async function GET(){
+async function handleGET(){
   try{
     const {db,user}=await session();
     const [acceptances,preferences,requests]=await Promise.all([
@@ -23,7 +24,7 @@ export async function GET(){
     return NextResponse.json({account:{id:user.id,email:user.email,name:user.user_metadata.name??''},acceptances:acceptances.data,marketing:preferences.data?.marketing??false,requests:requests.data,scope:'Resumo da conta e até 100 registros de cada categoria. Solicite acesso completo para incluir dados de chamados e dados sob responsabilidade da empresa.'});
   }catch(error){return failure(error);}
 }
-export async function POST(request:Request){
+async function handlePOST(request:Request){
   try{
     const input=privacyInput.parse(await readJson(request));
     const {db}=await session();const {action,...payload}=input;
@@ -32,3 +33,7 @@ export async function POST(request:Request){
     return NextResponse.json(data,{status:action==='request'?201:200});
   }catch(error){return failure(error);}
 }
+
+export const GET = observeApi('/api/privacidade', handleGET);
+
+export const POST = observeApi('/api/privacidade', handlePOST);

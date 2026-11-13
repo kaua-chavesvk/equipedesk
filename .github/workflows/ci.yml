@@ -45,6 +45,18 @@ jobs:
         env:
           DEMO_MODE: 'true'
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify privacy admin access with local Supabase
+        shell: bash
+        run: |
+          pnpm exec supabase status -o env > "$RUNNER_TEMP/supabase-e2e.env"
+          source "$RUNNER_TEMP/supabase-e2e.env"
+          export NEXT_PUBLIC_SUPABASE_URL="$API_URL"
+          export NEXT_PUBLIC_SUPABASE_ANON_KEY="$ANON_KEY"
+          export DEMO_PASSWORD="$(node -p "require('node:crypto').randomBytes(24).toString('hex')")"
+          SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" node scripts/seed-admin-e2e.mjs
+          pnpm exec playwright test --config playwright.supabase.config.ts
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ''
       - run: pnpm test:e2e
         env:
           DEMO_MODE: 'true'
