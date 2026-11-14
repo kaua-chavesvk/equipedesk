@@ -84,3 +84,9 @@ O [relatório de segurança](security-report.md) registra os 21 itens solicitado
 - README e inventário de licenças atualizados. Capturas em `artifacts/workspace-kanban-dark-desktop.png` e `artifacts/workspace-dark-mobile.png`.
 - Verificações concluídas: 81 testes unitários em 13 arquivos, lint, tipos, auditoria sem vulnerabilidades conhecidas, documentos legais e varredura de segredos. Build de prévia Vercel concluído (`dpl_44z1ZZVUbszb1vwM5ghgzoELF7EA`).
 - Os testes focados de reversão, paleta, tema e arraste passaram em desktop e celular (arraste físico somente desktop, com alternativa por botão no toque). Uma rodada completa foi interrompida por pausa prolongada e escassez de memória do computador; a repetição está em andamento. Testes de demonstração não comprovam RLS ou concorrência em PostgreSQL real.
+
+### Validação e publicação concluídas
+
+O [CI do commit 2ad2ead](https://github.com/kaua-chavesvk/equipedesk/actions/runs/43516599266) concluiu com sucesso: lint, tipos, 81 testes unitários, testes SQL, RLS pela API autenticada, build, um E2E de restrição administrativa com Supabase local e a suíte de demonstração com 47 E2E aprovados e um ignorado (arraste no projeto móvel). Esse resultado remoto substitui as tentativas locais interrompidas como evidência da suíte completa. Não representa um teste de carga ou uma execução no banco de produção.
+
+O deployment de produção `dpl_Fzh3GHoCnNmGcH69mtEVWyq5F1MH` concluiu o build e atende `https://miakaelsondesk.vercel.app`. A conferência publicada verificou login HTTP 200, tema escuro persistido após recarregar, paleta por teclado, foco restaurado ao fechar, ausência de rolagem horizontal em 390 px e nenhum erro JavaScript no fluxo. Captura em `artifacts/production-login-dark-mobile.png`.
