@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { ProfileAvatar } from './profile-avatar';
 import { AccountAppearance } from '@/features/account-settings/appearance-context';
+import { formatAccountDate } from '@/features/account-settings/format';
 import { DeskDialog } from './desk-dialog';
 import { WorkspaceCommands } from './workspace-commands';
 import { TicketBoard } from '@/features/tickets/ticket-board';
@@ -10,7 +11,7 @@ import { nextTicketStatus, optimisticTransition, type TicketAction } from '@/fea
 import type { Role, TicketStatus } from '@/features/tickets/rules';
 import { conversationTimeline } from '@/lib/conversation-timeline';
 import { useRouter } from 'next/navigation';
-import { useContext, useState, useEffect, useTransition, useRef, type FormEvent } from 'react';
+import { useContext, useState, useEffect, useTransition, useRef, useSyncExternalStore, type FormEvent } from 'react';
 import { LayoutDashboard, Ticket as TicketIcon, Users, ChevronDown, Plus, Search, ArrowUpRight, ArrowRight, ArrowLeft, Check, Clock3, CircleDot, CheckCheck, Layers3, HelpCircle, ChevronLeft, ChevronRight, SlidersHorizontal, Settings, X, Send, Sparkles, ShieldCheck, Menu, LogOut, LoaderCircle, Copy, Signal } from 'lucide-react';
 type Ticket={id:string;organization_id:string;requester_id:string;assignee_id:string|null;title:string;description:string;priority:string;status:TicketStatus;version:number;created_at:string};
 type Member={user_id:string;role:string;name?:string;email?:string;avatarUrl?:string|null};
@@ -20,12 +21,17 @@ const statusLabels:Record<string,string>={open:'Aberto',in_progress:'Em andament
 const priorityLabels:Record<string,string>={low:'Baixa',medium:'Média',high:'Alta',urgent:'Urgente'};
 const roleLabels:Record<string,string>={admin:'Administrador',agent:'Atendente',requester:'Solicitante'};
 async function fetchConversation(url:string){const response=await fetch(url);const result=await response.json();if(!response.ok)throw new Error(typeof result.error==='string'?result.error:'Não foi possível carregar a conversa. Tente novamente.');return result;}
-function date(value:string){return new Date(value).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}
+const subscribeToDeviceZone = () => () => {};
+const deviceZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+const serverZone = () => '';
 function initials(name: string) {
   return name.trim().split(/\s+/).slice(0, 2).map(word => Array.from(word)[0]).join('').toUpperCase() || 'ED';
 }
 export function Workspace({data,path}:{data:Data,path:string[]}){const router=useRouter();const overlayTrigger=useRef<HTMLElement|null>(null);const base=`/e/${data.organization.slug}`;const view=path[0]??'painel';const [pending,startTransition]=useTransition();const [conversationBusy,setConversationBusy]=useState(Boolean(path[0]==='chamados'&&path[1]&&path[1]!=='novo'));const [search,setSearch]=useState(data.query.q);const [filter,setFilter]=useState(data.query.status);const [priority,setPriority]=useState(data.query.priority);const [page,setPage]=useState(data.query.page);const [menu,setMenu]=useState(false);const [orgMenu,setOrgMenu]=useState(false);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [invite,setInvite]=useState(false);const [inviteLink,setInviteLink]=useState('');const [details,setDetails]=useState<Record<string,unknown>|null>(null);const isNew=view==='chamados'&&path[1]==='novo';const serverTicket=view==='chamados'&&path[1]&&!isNew?data.tickets.find(t=>t.id===path[1]):undefined;
 const preferences = useContext(AccountAppearance);
+const automaticZone = useSyncExternalStore(subscribeToDeviceZone, deviceZone, serverZone);
+const timeZone = preferences?.timezone_mode === 'manual' ? preferences.timezone : automaticZone;
+const date = (value: string) => timeZone ? formatAccountDate(value, timeZone) : '—';
 const [board, setBoard] = useState(data.queueView === 'kanban');
 const previousView = useRef(data.viewPreference);
 useEffect(() => {

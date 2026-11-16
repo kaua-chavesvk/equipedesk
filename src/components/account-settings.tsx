@@ -91,8 +91,7 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
     const input = preferencesSchema.safeParse(values);
     if (!input.success) { setError(t.error); return; }
     const patch = Object.fromEntries(Object.entries(input.data).filter(([key, value]) => saved[key as keyof AccountPreferences] !== value));
-    if (!Object.keys(patch).length && saved.theme_explicit) return;
-    if (!saved.theme_explicit) patch.theme = input.data.theme;
+    if (!Object.keys(patch).length) return;
     void submit(event, '/api/conta/preferencias', { patch, version: saved.version });
   }
 
@@ -122,7 +121,7 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
             <label>{t.queue}<select value={draft.queue_view} onChange={e => field('queue_view', e.target.value as AccountPreferences['queue_view'])}><option value="list">{t.list}</option><option value="kanban">Kanban</option></select></label>
           </fieldset>
           <div className={`settings-preview ${draft.theme === 'system' ? 'system-preview' : draft.theme}`}
-            data-contrast={draft.contrast} style={{ fontSize: draft.text_scale + '%' }}>
+            data-contrast={draft.contrast} style={{ fontSize: (100 * draft.text_scale / preferences.text_scale) + '%' }}>
             <strong>{t.preview}</strong><p>{t.sample}</p>
           </div>
           <div className="settings-actions"><button className="button primary" disabled={busy}>{busy ? t.saving : t.save}</button><button type="button" className="button secondary" disabled={busy} onClick={() => { setDraft(saved); setError(''); }}>{t.cancel}</button></div>

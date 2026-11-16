@@ -4,7 +4,7 @@ import { ThemeProvider, useTheme } from 'next-themes';
 import { MotionConfig } from 'motion/react';
 import { Toaster, toast } from 'sonner';
 import { AccountCommands } from './account-commands';
-import { useContext, useSyncExternalStore } from 'react';
+import { useContext, useEffect, useRef, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import type { UserPreferences } from '@/lib/supabase/database.types';
 
@@ -13,8 +13,8 @@ import { AccountAppearance } from '@/features/account-settings/appearance-contex
 const subscribe = () => () => {};
 
 function Notifications() {
-  const { resolvedTheme } = useTheme();
-  return <Toaster theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
+  const { resolvedTheme, forcedTheme } = useTheme();
+  return <Toaster theme={(forcedTheme ?? resolvedTheme) === 'dark' ? 'dark' : 'light'}
     position="bottom-right" closeButton richColors
     offset={{ bottom: '24px', right: '24px' }}
     mobileOffset={{ bottom: 'calc(84px + env(safe-area-inset-bottom))', left: '12px', right: '12px' }} />;
@@ -23,9 +23,11 @@ function Notifications() {
 export function UiProviders({ children, nonce, preferences }: {
   children: React.ReactNode; nonce?: string; preferences: UserPreferences | null;
 }) {
+  const explicit = preferences?.theme_explicit ? preferences.theme : undefined;
   return <AccountAppearance.Provider value={preferences}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem nonce={nonce}
-      forcedTheme={preferences?.theme_explicit ? preferences.theme : undefined}>
+    <ThemeProvider key={explicit === 'system' ? 'account-system' : 'theme'} attribute="class"
+      defaultTheme="system" enableSystem nonce={nonce} storageKey={explicit === 'system' ? 'desk-system-theme' : 'theme'}
+      forcedTheme={explicit === 'system' ? undefined : explicit}>
       <MotionConfig reducedMotion={preferences?.motion === 'reduce' ? 'always' : 'user'}>{children}</MotionConfig>
       <Notifications /><AccountCommands />
     </ThemeProvider>
@@ -37,6 +39,20 @@ export function ThemeSelect() {
   const preferences = useContext(AccountAppearance);
   const router = useRouter();
   const mounted = useSyncExternalStore(subscribe, () => true, () => false);
+  const imported = useRef<string>(undefined);
+  useEffect(() => {
+    if (!preferences || preferences.theme_explicit || imported.current === preferences.user_id) return;
+    let previous: string | null;
+    try { previous = localStorage.getItem('theme'); } catch { return; }
+    if (previous !== 'light' && previous !== 'dark' && previous !== 'system') return;
+    imported.current = preferences.user_id;
+    void fetch('/api/conta/preferencias', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ patch: { theme: previous }, version: preferences.version }),
+    }).then(response => {
+      if (response.ok || response.status === 409) router.refresh();
+    }).catch(() => { /* Keep the existing browser preference if import fails. */ });
+  }, [preferences, router]);
   async function change(value: string) {
     if (!preferences) { setTheme(value); return; }
     try {
@@ -50,9 +66,10 @@ export function ThemeSelect() {
       toast.error('Não foi possível salvar o tema. Atualize a página e tente novamente.');
     }
   }
-  return <label className="theme-select">Tema
-    <select aria-label="Tema" disabled={!mounted} value={mounted ? forcedTheme ?? theme ?? 'system' : 'system'} onChange={event => void change(event.target.value)}>
-      <option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Escuro</option>
+  const english = preferences?.locale === 'en';
+  return <label className="theme-select" lang={english ? 'en' : undefined}>{english ? 'Theme' : 'Tema'}
+    <select aria-label={english ? 'Theme' : 'Tema'} disabled={!mounted} value={mounted ? (preferences?.theme_explicit ? preferences.theme : forcedTheme ?? theme ?? 'system') : 'system'} onChange={event => void change(event.target.value)}>
+      <option value="system">{english ? 'System' : 'Sistema'}</option><option value="light">{english ? 'Light' : 'Claro'}</option><option value="dark">{english ? 'Dark' : 'Escuro'}</option>
     </select>
   </label>;
 }

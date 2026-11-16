@@ -83,7 +83,7 @@ export function AvatarSettings({ profile, uploadEnabled, locale, url }: {
       setSelection({ file, url: URL.createObjectURL(file) });
     }} /></label>}
     {profile.hasAvatar && <button type="button" className="button secondary" disabled={busy} onClick={() => void remove()}>{t.remove}</button>}
-    {selection && <DeskDialog title={t.preview} description={t.instructions} open onOpenChange={open => { if (!open && !busy) setSelection(null); }}>
+    {selection && <DeskDialog title={t.preview} description={t.instructions} lang={locale} open onOpenChange={open => { if (!open && !busy) setSelection(null); }}>
       <div className="avatar-crop-preview"><Image src={selection.url} alt="" fill unoptimized
         style={{ objectFit: 'cover', objectPosition: `${crop.x * 100}% ${crop.y * 100}%`, transform: `scale(${crop.zoom})`, transformOrigin: `${crop.x * 100}% ${crop.y * 100}%` }} /></div>
       <fieldset disabled={busy} className="avatar-crop-controls">

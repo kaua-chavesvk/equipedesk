@@ -7,6 +7,7 @@ import { observeApi } from '@/lib/http/observe-api';
 import { accountFlags, accountRpcError, requireAccount } from '@/lib/server/account-settings';
 import { attestAvatarFinalization, attestAvatarUpload } from '@/lib/server/avatar-attestation';
 import { normalizeAvatar } from '@/lib/server/avatar-image';
+import { rateLimitBucket } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 const bucket = 'profile-avatars';
@@ -43,6 +44,12 @@ export const POST = observeApi('/api/conta/foto', async request => {
     const { db, user } = await requireAccount();
     const flags = await accountFlags();
     if (!flags.settings || !flags.avatars) throw new HttpError(409, 'Envio de foto indisponível.');
+    let allowed: boolean;
+    try { allowed = await rateLimitBucket('avatar-upload', user.id, 5); }
+    catch { throw new HttpError(503, 'Envio de foto temporariamente indisponível.'); }
+    if (!allowed) return NextResponse.json({ error: 'Aguarde um minuto antes de enviar outra foto.' }, {
+      status: 429, headers: { 'Retry-After': '60' },
+    });
     const secret = process.env.AVATAR_PROCESSING_SECRET;
     const keyId = process.env.AVATAR_PROCESSING_KEY_ID;
     if (!secret || secret.length < 32 || !keyId) throw new HttpError(503, 'Processamento de foto indisponível.');

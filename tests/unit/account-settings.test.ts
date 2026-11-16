@@ -5,6 +5,7 @@ import { DEFAULT_ACCOUNT_PREFERENCES as defaults, displayNameSchema, preferences
   mergePreferences, avatarSourceMetadataSchema, avatarCropSchema, workspacePreferenceSchema,
 } from '../../src/features/account-settings/contracts';
 import { attestAvatarUpload, attestAvatarFinalization } from '../../src/lib/server/avatar-attestation';
+import { formatAccountDate } from '../../src/features/account-settings/format';
 
 describe('configurações da conta', () => {
   it('preserva Unicode e normaliza espaços externos sem aceitar controles', () => {
@@ -39,6 +40,12 @@ describe('configurações da conta', () => {
   it('visualização recente aceita apenas enums, sem URLs ou IDs arbitrários', () => {
     expect(workspacePreferenceSchema.safeParse({ view: 'https://externo.example', queueView: 'list', version: 0 }).success).toBe(false);
     expect(workspacePreferenceSchema.parse({ view: 'queue', queueView: 'kanban', version: 0 })).toBeDefined();
+  });
+  it('mantém a data brasileira e ajusta a virada do dia pelo fuso', () => {
+    const value = '2025-01-02T01:30:00Z';
+    expect(formatAccountDate(value, 'America/Sao_Paulo')).toBe('01/01/2025');
+    expect(formatAccountDate(value, 'UTC')).toBe('02/01/2025');
+    expect(formatAccountDate(value, 'America/Sao_Paulo', true)).toContain('22:30');
   });
 });
 
