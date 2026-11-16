@@ -34,8 +34,13 @@ export async function proxy(request: NextRequest) {
     const mutating=!['GET','HEAD','OPTIONS'].includes(request.method);
     if(mutating&&!allowedMutation(request,site,prod))return deny(403,'csrf_rejected','Origem da requisição não permitida.');
     if(request.method==='OPTIONS')return finish(new NextResponse(null,{status:405}));
-    if(mutating&&request.method!=='DELETE'&&request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()!=='application/json')return deny(415,'unsupported_media','Envie os dados em JSON. Arquivos não são aceitos.');
-    if(Number(request.headers.get('content-length')??0)>32768)return deny(413,'body_too_large','Requisição muito grande. Limite de 32 KiB.');
+    const avatarUpload = request.method === 'POST' && path === '/api/conta/foto';
+    const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+    const expectedType = avatarUpload ? 'multipart/form-data' : 'application/json';
+    if(mutating && request.method !== 'DELETE' && contentType !== expectedType)
+      return deny(415,'unsupported_media',avatarUpload ? 'Envie a foto em um formulário.' : 'Envie os dados em JSON. Arquivos não são aceitos.');
+    if(Number(request.headers.get('content-length')??0) > (avatarUpload ? 2162688 : 32768))
+      return deny(413,'body_too_large',avatarUpload ? 'A foto deve ter no máximo 2 MiB.' : 'Requisição muito grande. Limite de 32 KiB.');
     try { if(!await rateLimit(request)){
       const response=deny(429,'rate_limit','Muitas requisições. Aguarde um minuto.');response.headers.set('Retry-After','60');return response;
     }}catch{

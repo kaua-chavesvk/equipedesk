@@ -1,13 +1,15 @@
 import { cookies } from 'next/headers';
 import { randomUUID } from 'node:crypto';
 import { configured,supabaseServer } from './supabase/server';
+import { accountFlags } from './server/account-settings';
+import { avatarUrl } from './server/avatar-url';
 export type Role='admin'|'agent'|'requester';
 export type Organization={id:string;name:string;slug:string;role:Role;platform_admin?:boolean};
 export type Ticket={id:string;organization_id:string;requester_id:string;assignee_id:string|null;title:string;description:string;priority:'low'|'medium'|'high'|'urgent';status:'open'|'in_progress'|'resolved';version:number;created_at:string;requester_name?:string;assignee_name?:string;category?:string};
-export type Member={user_id:string;id:string;name:string;email:string;role:Role;organization_id:string};
+export type Member={user_id:string;id:string;name:string;email:string;role:Role;organization_id:string;avatarUrl?:string|null};
 export type Comment={id:string;body:string;author_id:string;created_at:string;author_name?:string};
 export type TicketEvent={id:string;kind:string;actor_id:string;created_at:string;payload:Record<string,unknown>};
-export type Workspace={organizations:Organization[];organization:Organization;user:{id:string;email:string;name:string};tickets:Ticket[];members:Member[];demo:boolean};
+export type Workspace={organizations:Organization[];organization:Organization;user:{id:string;email:string;name:string;avatarUrl?:string|null};tickets:Ticket[];members:Member[];demo:boolean};
 type Demo={tickets:Ticket[];comments:Record<string,Comment[]>;events:Record<string,TicketEvent[]>;members:Member[];organizations:Organization[]};
 const user={id:'11111111-1111-4111-8111-111111111111',email:'marina@aurora.demo',name:'Marina Costa'};
 const organizations:Organization[]=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Aurora Studio',slug:'aurora',role:'admin'},{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',name:'Órbita Tecnologia',slug:'orbita',role:'requester'}];
@@ -30,6 +32,20 @@ export async function getWorkspace(slug='aurora'):Promise<Workspace>{
  const db=await supabaseServer();const {data:{user:auth}}=await db.auth.getUser();if(!auth)throw new Error('Sessão ausente.');
  const orgs=await listOrganizations();const organization=orgs.find(o=>o.slug===slug);if(!organization)throw new Error('Empresa não encontrada.');
  const {data:members,error:memberError}=await db.from('memberships').select('*').eq('organization_id',organization.id);if(memberError)throw memberError;
- return {organizations:orgs,organization,user:{id:auth.id,email:auth.email??'',name:auth.user_metadata.name??auth.email?.split('@')[0]??'Você'},tickets:[],members:(members??[]).map(m=>({...m,id:m.user_id,name:m.user_id===auth.id?'Você':'Membro da equipe',email:''})),demo:false};
+ const flags = await accountFlags().catch(() => ({ settings: false, avatars: false }));
+ const profileIds = [...new Set([auth.id, ...(members ?? []).map(member => member.user_id)])];
+ const profiles = new Map<string, { display_name: string; avatarUrl: string | null }>();
+ if (flags.settings) {
+  for (let start = 0; start < profileIds.length; start += 50) {
+   const { data, error } = await db.from('profiles').select('user_id,display_name,avatar_path,avatar_version').in('user_id', profileIds.slice(start, start + 50));
+   if (error) break;
+   for (const profile of data ?? []) profiles.set(profile.user_id, {
+    display_name: profile.display_name,
+    avatarUrl: flags.avatars && profile.avatar_path ? avatarUrl(auth.id, profile.user_id, profile.avatar_version) : null,
+   });
+  }
+ }
+ const own = profiles.get(auth.id);
+ return {organizations:orgs,organization,user:{id:auth.id,email:auth.email??'',name:own?.display_name??auth.user_metadata.name??auth.email?.split('@')[0]??'Você',avatarUrl:own?.avatarUrl},tickets:[],members:(members??[]).map(m=>({...m,id:m.user_id,name:profiles.get(m.user_id)?.display_name??(m.user_id===auth.id?'Você':'Membro da equipe'),avatarUrl:profiles.get(m.user_id)?.avatarUrl,email:''})),demo:false};
 }
 

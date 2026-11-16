@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Search } from 'lucide-react';
 import { DeskDialog } from './desk-dialog';
+import { AccountAppearance } from '@/features/account-settings/appearance-context';
 
 export function WorkspaceCommands({ open, onOpenChange, base, organizations, tickets, restoreFocus }: {
   open: boolean; onOpenChange: (open: boolean) => void; base?: string;
@@ -13,6 +14,7 @@ export function WorkspaceCommands({ open, onOpenChange, base, organizations, tic
 }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const preferences = useContext(AccountAppearance);
   const normalize = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
   const term = normalize(query.trim().replace(/^#/, ''));
   const actions = [
@@ -21,6 +23,7 @@ export function WorkspaceCommands({ open, onOpenChange, base, organizations, tic
       { label: 'Novo chamado', kind: 'Navegação', href: base + '/chamados/novo' },
     ] : [{ label: 'Seus espaços de trabalho', kind: 'Navegação', href: '/onboarding' }]),
     { label: 'Meus dados e privacidade', kind: 'Navegação', href: '/meus-dados' },
+    ...(preferences ? [{ label: preferences.locale === 'en' ? 'Settings' : 'Configurações', kind: 'Navegação', href: (base ?? '/conta') + '/configuracoes' }] : []),
     ...organizations.map(org => ({ label: org.name, kind: 'Empresa', href: '/e/' + org.slug })),
     ...tickets.map(ticket => ({ label: ticket.title, kind: '#' + ticket.id.slice(-6).toUpperCase(), href: base + '/chamados/' + ticket.id })),
   ].filter(item => normalize(item.label + ' ' + item.kind).includes(term));

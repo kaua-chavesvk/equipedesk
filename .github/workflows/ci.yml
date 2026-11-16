@@ -41,6 +41,7 @@ jobs:
           export SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           node scripts/seed-demo.mjs
           node scripts/test-data-api.mjs
+          node scripts/test-avatar-storage.mjs
       - run: pnpm build
         env:
           DEMO_MODE: 'true'
