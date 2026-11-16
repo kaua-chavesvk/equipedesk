@@ -72,7 +72,7 @@ begin
   raise exception '409:Envio de foto indisponível.';
  end if;
  if p_id is null or p_digest is null or p_digest !~ '^[0-9a-f]{64}$' or p_signature is null or p_signature !~ '^[0-9a-f]{64}$'
-  or p_size is null or p_size not between 1 and 262144 or p_version is null or p_version<1
+  or p_size is null or p_size not between 1 and 262144 or p_version is null or p_version<1 or p_version>=2147483647
   or p_expires is null or p_expires <= extract(epoch from clock_timestamp())
   or p_expires > extract(epoch from clock_timestamp())+60 then raise exception '422:Intenção de foto inválida ou expirada.'; end if;
  object_path:=actor::text || '/' || p_id::text || '.webp';
@@ -157,6 +157,7 @@ begin
  if not exists(select 1 from private.account_feature_flags where name='avatars' and enabled) then raise exception '409:Envio de foto indisponível.'; end if;
  -- All profile writes acquire the profile lock before an intent lock.
  select * into profile from public.profiles where user_id=actor for update;
+ if not found then raise exception '409:Perfil indisponível. Recarregue e tente novamente.'; end if;
  select * into intent from private.avatar_intents where id=p_id and user_id=actor for update;
  if not found or intent.state<>'prepared' or intent.expires_at<=now() then raise exception '409:Intenção de foto indisponível ou expirada.'; end if;
  if profile.version<>intent.profile_version then raise exception '409:Seu perfil foi atualizado. Recarregue e tente novamente.'; end if;
@@ -190,7 +191,7 @@ declare actor uuid:=auth.uid(); profile public.profiles;
 begin
  if actor is null then raise exception '401:Sessão ausente.'; end if;
  select * into profile from public.profiles where user_id=actor for update;
- if p_version is null or p_version<1 or not found or profile.version<>p_version then raise exception '409:Seu perfil foi atualizado. Recarregue e tente novamente.'; end if;
+ if p_version is null or p_version<1 or p_version>=2147483647 or not found or profile.version<>p_version then raise exception '409:Seu perfil foi atualizado. Recarregue e tente novamente.'; end if;
  if profile.avatar_path is null then return to_jsonb(profile); end if;
  insert into private.avatar_cleanup_jobs(user_id,path,reason) values(actor,profile.avatar_path,'removed') on conflict do nothing;
  update private.avatar_intents set state='retired' where path=profile.avatar_path;

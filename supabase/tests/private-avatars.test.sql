@@ -52,7 +52,8 @@ select is((select count(*)::integer from storage.objects where bucket_id='profil
 select set_config('storage.operation','',true);
 select is((select count(*)::integer from storage.objects where bucket_id='profile-avatars'),0,'Operação ausente é recusada');
 select set_config('storage.operation','storage.object.upload_update',true);
-select is((with changed as (update storage.objects set metadata='{}' where bucket_id='profile-avatars' returning id) select count(*)::integer from changed),0,'Arquivo não é sobrescrito');
+with changed as (update storage.objects set metadata='{}' where bucket_id='profile-avatars' returning id)
+ select is((select count(*)::integer from changed),0,'Arquivo não é sobrescrito');
 select set_config('request.jwt.claim.sub','b1000000-0000-4000-8000-000000000002',true);
 select set_config('storage.operation','storage.object.get_authenticated',true);
 select is((select count(*)::integer from storage.objects where bucket_id='profile-avatars'),1,'Colega real lê foto atual');
@@ -61,6 +62,9 @@ select is(private.avatar_can_delete('profile-avatars',(select path from avatar_f
 select set_config('request.jwt.claim.sub','b1000000-0000-4000-8000-000000000003',true);
 select set_config('storage.operation','storage.object.get_authenticated',true);
 select is((select count(*)::integer from storage.objects where bucket_id='profile-avatars'),0,'Outra empresa não lê foto');
+select set_config('storage.operation','storage.object.upload',true);
+select throws_ok($$insert into storage.objects(bucket_id,name,owner_id,metadata) select 'profile-avatars',path,auth.uid()::text,'{"mimetype":"image/webp","size":100}'::jsonb from avatar_fixture$$,'42501',null,'Outra pessoa não usa intenção alheia');
+select set_config('storage.operation','storage.object.get_authenticated',true);
 select set_config('request.jwt.claim.sub','b1000000-0000-4000-8000-000000000004',true);
 select is((select count(*)::integer from storage.objects where bucket_id='profile-avatars'),0,'Admin global sem vínculo não recebe foto');
 reset role;
