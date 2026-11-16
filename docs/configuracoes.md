@@ -224,3 +224,5 @@ O usuário aprovou este desenho em 16/11/2026. Essa aprovação autoriza a Fase 
 4. Execute a limpeza dos objetos em processo administrativo com `scripts/run-avatar-cleanup.mjs` e confirme a remoção no ambiente de teste. Acompanhe trabalhos pendentes antes de liberar o piloto.
 
 Em 16/11/2026, a consulta `vercel env ls --environment preview` retornou uma lista vazia. O preview funcional depende de configurar a instância de teste e as variáveis desse ambiente.
+
+O [CI do commit 836f139](https://github.com/kaua-chavesvk/equipedesk/actions/runs/43912530885/attempts/2) aprovou 99 testes unitários, SQL, acesso pela API de dados, Storage HTTP com três sessões, build, dois testes de navegador com Supabase local e 47 testes da demonstração, com um ignorado. A jornada autenticada verificou nome, tema, escala, idioma da tela, upload normalizado e remoção com invalidação da URL anterior. A tradução das demais telas e a homologação hospedada seguem pendentes. A alteração de e-mail permanece em modo de leitura.
