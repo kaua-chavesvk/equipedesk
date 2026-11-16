@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useState, useSyncExternalStore, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { DEFAULT_ACCOUNT_PREFERENCES, preferencesSchema, type AccountPreferences } from '@/features/account-settings/contracts';
 import type { UserPreferences } from '@/lib/supabase/database.types';
 import { AvatarSettings } from './avatar-settings';
+const subscribe = () => () => {};
 
 const copy = {
   'pt-BR': {
@@ -52,6 +53,7 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [conflict, setConflict] = useState(false);
+  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
   async function submit(event: FormEvent, path: string, body: unknown) {
     event.preventDefault();
@@ -104,8 +106,8 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
       <section className="panel" aria-labelledby="appearance-heading">
         <h2 id="appearance-heading">{t.appearance}</h2>
         <form onSubmit={savePreferences}>
-          <fieldset className="settings-fields" disabled={busy}>
-            <label>{t.theme}<select value={draft.theme} onChange={e => field('theme', e.target.value as AccountPreferences['theme'])}><option value="system">{t.system}</option><option value="light">{t.light}</option><option value="dark">{t.dark}</option></select></label>
+          <fieldset className="settings-fields" disabled={busy || !mounted}>
+            <label>{t.theme}<select aria-label={t.theme} value={draft.theme} onChange={e => field('theme', e.target.value as AccountPreferences['theme'])}><option value="system">{t.system}</option><option value="light">{t.light}</option><option value="dark">{t.dark}</option></select></label>
             <label>{t.text}<select value={draft.text_scale} onChange={e => field('text_scale', Number(e.target.value) as AccountPreferences['text_scale'])}><option value="100">100%</option><option value="110">110%</option><option value="125">125%</option></select></label>
             <label>{t.density}<select value={draft.density} onChange={e => field('density', e.target.value as AccountPreferences['density'])}><option value="comfortable">{t.comfortable}</option><option value="compact">{t.compact}</option></select></label>
             <label>{t.contrast}<select value={draft.contrast} onChange={e => field('contrast', e.target.value as AccountPreferences['contrast'])}><option value="standard">{t.standard}</option><option value="high">{t.high}</option></select></label>
@@ -124,14 +126,14 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
             data-contrast={draft.contrast} style={{ fontSize: (100 * draft.text_scale / preferences.text_scale) + '%' }}>
             <strong>{t.preview}</strong><p>{t.sample}</p>
           </div>
-          <div className="settings-actions"><button className="button primary" disabled={busy}>{busy ? t.saving : t.save}</button><button type="button" className="button secondary" disabled={busy} onClick={() => { setDraft(saved); setError(''); }}>{t.cancel}</button></div>
+          <div className="settings-actions"><button className="button primary" disabled={busy || !mounted}>{busy ? t.saving : t.save}</button><button type="button" className="button secondary" disabled={busy || !mounted} onClick={() => { setDraft(saved); setError(''); }}>{t.cancel}</button></div>
         </form>
       </section>
       <section className="panel" aria-labelledby="account-heading">
         <h2 id="account-heading">{t.account}</h2>
         <form onSubmit={event => void submit(event, '/api/conta/perfil', { displayName: name, version: profile.version })}>
           <label>{t.name}<input required maxLength={100} autoComplete="nickname" value={name} onChange={event => setName(event.target.value)} /></label>
-          <div className="settings-actions"><button className="button primary" disabled={busy}>{t.saveName}</button></div>
+          <div className="settings-actions"><button className="button primary" disabled={busy || !mounted}>{t.saveName}</button></div>
         </form>
         {(avatars || profile.hasAvatar) && <AvatarSettings profile={profile} uploadEnabled={avatars} locale={preferences.locale} url={photoUrl} />}
         <dl className="settings-email"><dt>{t.email}</dt><dd>{email}</dd></dl>

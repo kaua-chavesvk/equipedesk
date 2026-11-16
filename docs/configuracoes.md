@@ -1,8 +1,8 @@
 # Configurações de aparência e conta — desenho para aprovação
 
-**Desenho aprovado em 16/11/2026 · branch `feature/configuracoes-conta` · Fase 3 em implementação.**
+**Desenho aprovado em 16/11/2026 · branch `feature/configuracoes-conta` · implementação e validação em andamento.**
 
-Base: [levantamento da Fase 1](levantamento-configuracoes.md), código `d4a6bd4`. O usuário confirmou **pt-BR e inglês** e **foto visível ao titular e a colegas com empresa compartilhada**. As demais escolhas abaixo constituem a proposta a aprovar antes da Fase 3. Nenhuma tabela, política, rota ou configuração nova descrita aqui está implementada.
+Base do desenho: [levantamento da Fase 1](levantamento-configuracoes.md), código `d4a6bd4`. O usuário confirmou **pt-BR e inglês** e **foto visível ao titular e a colegas com empresa compartilhada**. As seções mantêm o escopo aprovado. O registro de progresso indica quais partes já estão na branch.
 
 ## 1. Escopo e escolhas propostas
 
@@ -215,3 +215,12 @@ Produzido este desenho e atualizado `docs/progress.md`. Foram revisadas as fonte
 Itens para aprovação do desenho: preferências por usuário, escala/densidade/contraste, inglês com formatos brasileiros, foto de 2 MiB para WebP 256 px, protocolo de publicação com sessão/atestado, URL curta da aplicação e condição de habilitação da troca de e-mail. Nome do responsável, prazo e projeto/URL de homologação precisam ser definidos antes da publicação de preview com dados reais; a implementação local pode usar dados sintéticos.
 
 O usuário aprovou este desenho em 16/11/2026. Essa aprovação autoriza a Fase 3 e não altera a restrição de publicação em produção.
+
+### Preparar a homologação da branch
+
+1. Aponte o ambiente Preview para uma instância Supabase de teste e uma origem HTTPS estável. Configure a chave pública, Redis de teste e as variáveis de foto descritas em `.env.example`.
+2. Aplique as migrações na instância de teste. Cadastre o segredo de processamento no Vault e associe seu ID com `avatar_processing_key_set` pela operação administrativa. Configure uma chave diferente para a assinatura das URLs da aplicação.
+3. Use `account_feature_set` pela operação administrativa para habilitar `settings` primeiro. Verifique login, nome, preferências e idioma da tela. Habilite `avatars` depois de verificar o bucket e as políticas pela API do Storage. Preserve `email_change` desligada até comprovar reautenticação e confirmação no provedor.
+4. Execute a limpeza dos objetos em processo administrativo com `scripts/run-avatar-cleanup.mjs` e confirme a remoção no ambiente de teste. Acompanhe trabalhos pendentes antes de liberar o piloto.
+
+Em 16/11/2026, a consulta `vercel env ls --environment preview` retornou uma lista vazia. O preview funcional depende de configurar a instância de teste e as variáveis desse ambiente.
