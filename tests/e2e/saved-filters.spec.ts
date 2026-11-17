@@ -52,7 +52,7 @@ test('salva filtros entre sessões e recupera conflito sem sobrescrever alteraç
     // The desktop component still has the previous version.
     page.once('dialog', dialog => dialog.accept());
     await panel.getByRole('button', { name: 'Remove filter My triage' }).click();
-    await expect(panel.getByRole('alert')).toHaveText('The filters changed in another session. Reload before saving.');
+    await expect(panel.getByRole('alert')).toHaveText('Filters changed in another session. Reload before saving.');
     await panel.getByRole('button', { name: 'Reload filters' }).click();
     await expect(panel.getByRole('button', { name: 'My triage', exact: true })).toBeVisible();
     page.once('dialog', dialog => dialog.accept());
