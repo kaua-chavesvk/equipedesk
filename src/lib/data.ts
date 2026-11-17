@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { configured,supabaseServer } from './supabase/server';
 import { accountFlags } from './server/account-settings';
 import { avatarUrl } from './server/avatar-url';
+import { requireAdminAssurance } from './server/admin-assurance';
 export type Role='admin'|'agent'|'requester';
 export type Organization={id:string;name:string;slug:string;role:Role;platform_admin?:boolean};
 export type Ticket={id:string;organization_id:string;requester_id:string;assignee_id:string|null;title:string;description:string;priority:'low'|'medium'|'high'|'urgent';status:'open'|'in_progress'|'resolved';version:number;created_at:string;requester_name?:string;assignee_name?:string;category?:string};
@@ -25,6 +26,7 @@ export async function listOrganizations():Promise<Organization[]>{
  const db=await supabaseServer();const {data:{user}}=await db.auth.getUser();if(!user)return [];
  const [{data:links,error},{data:orgs,error:orgError},{data:admins,error:adminError}]=await Promise.all([db.from('memberships').select('organization_id,role').eq('user_id',user.id),db.from('organizations').select('id,name,slug'),db.from('platform_admins').select('user_id').eq('user_id',user.id)]);if(error||orgError||adminError)throw error??orgError??adminError;
  const globalAdmin=(admins??[]).some(a=>a.user_id===user.id);
+ if(globalAdmin)await requireAdminAssurance(db.auth,user.id);
  return (orgs??[]).flatMap(org=>{if(globalAdmin)return [{...org,role:'admin' as const,platform_admin:true}];const link=links?.find(m=>m.organization_id===org.id);return link?[{...org,role:link.role}]:[];});
 }
 export async function getWorkspace(slug='aurora'):Promise<Workspace>{

@@ -5,6 +5,7 @@ import { failure, HttpError } from '@/lib/http/api';
 import { readJson } from '@/lib/http/read-json';
 import { privacyInput } from '@/lib/privacy-input';
 import type { Json } from '@/lib/supabase/database.types';
+import { requireAdminAssurance } from '@/lib/server/admin-assurance';
 
 async function session(){
   if(!configured())throw new HttpError(422,'A demonstração não registra pedidos ou aceites reais. Use o canal de privacidade para atendimento.');
@@ -27,7 +28,8 @@ async function handleGET(){
 async function handlePOST(request:Request){
   try{
     const input=privacyInput.parse(await readJson(request));
-    const {db}=await session();const {action,...payload}=input;
+    const {db,user}=await session();const {action,...payload}=input;
+    if(action==='answer')await requireAdminAssurance(db.auth,user.id);
     const {data,error}=await db.rpc('privacy_command',{p_action:action,p_payload:payload as Json});
     if(error)throw new Error(error.message);
     return NextResponse.json(data,{status:action==='request'?201:200});

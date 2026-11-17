@@ -144,7 +144,8 @@ Use `.env.example` como referência local. Na Vercel, configure as variáveis po
 | `RATE_LIMIT_REDIS_URL` | Endpoint REST HTTPS do Redis |
 | `RATE_LIMIT_REDIS_TOKEN` | Token REST com permissão de escrita; segredo exclusivo do servidor |
 | `DEMO_MODE` | Demonstração explícita sem Supabase em produção; não substitui autenticação e persistência reais |
-| `TRUST_PROXY` | Confiança nos cabeçalhos encaminhados; ativar somente com ingresso que os sobrescreva de forma confiável |
+| `TRUST_PROXY` | Fora da Vercel, use `true` somente se o ingresso sobrescrever `X-Real-IP` e `X-Forwarded-Proto` e impedir acesso direto à origem |
+| `ENFORCE_PLATFORM_ADMIN_AAL2` | Ativa a verificação de AAL2 nas operações administrativas do Next.js. Habilite após validar o cadastro e o desafio TOTP para todos os administradores |
 | `LEGAL_ENTITY_NAME`, `PRIVACY_CONTACT_EMAIL`, `LEGAL_ENTITY_CNPJ`, `LEGAL_ENTITY_ADDRESS` | Identificação pública e canal de privacidade |
 
 A integração Upstash gerou `KV_REST_API_URL` e `KV_REST_API_TOKEN`; foram configurados os valores correspondentes em `RATE_LIMIT_REDIS_URL` e `RATE_LIMIT_REDIS_TOKEN`, que são os nomes lidos pelo aplicativo. O limitador usa Redis em produção e memória local no desenvolvimento sem Redis. Na próxima publicação, falha no Redis retornará HTTP 503 nas escritas e na rota de autenticação. Páginas e leituras seguem disponíveis com os controles de acesso.

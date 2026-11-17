@@ -50,6 +50,15 @@ it('redireciona HTTP para a origem HTTPS configurada',async()=>{
  productionEnv();const result=await proxy(new NextRequest('http://evil.example/login'));
  expect(result.status).toBe(308);expect(result.headers.get('location')).toBe('https://desk.example/login');
 });
+it('envia a CSP candidata em observação sem endurecer a política aplicada', async () => {
+  productionEnv();
+  const response = await proxy(new NextRequest('https://desk.example/login'));
+  const enforced = response.headers.get('content-security-policy');
+  expect(enforced).toContain("base-uri 'self'");
+  expect(response.headers.get('content-security-policy-report-only')).toBe(
+    enforced?.replace("base-uri 'self'", "base-uri 'none'").replace(' upgrade-insecure-requests;', ''),
+  );
+});
 it('rejeita CSRF antes de executar a API',async()=>{
  productionEnv();const result=await proxy(new NextRequest('https://desk.example/api/auth',{method:'POST',headers:{'content-type':'application/json'}}));
  expect(result.status).toBe(403);

@@ -1,4 +1,5 @@
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
+import { trustedClientIp } from './security';
 
 const memory = new Map<string,{count:number;expires:number}>();
 export function localLimit(key: string, limit: number, now = Date.now()) {
@@ -14,16 +15,24 @@ export function localLimit(key: string, limit: number, now = Date.now()) {
 export async function rateLimit(request: Request) {
   const prod = process.env.NODE_ENV === 'production';
   const auth = new URL(request.url).pathname === '/api/auth';
-  const limit = prod ? (auth ? 10 : 120) : 1000;
-  // Forwarded IPs are only accepted when a trusted ingress overwrites them.
-  const identity = process.env.TRUST_PROXY === 'true' ? request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'shared' : 'shared';
-  return rateLimitBucket(auth ? 'auth' : 'api', identity, limit);
+  const ip = trustedClientIp(request.headers);
+  if (auth) {
+    if (!await rateLimitBucket('auth-global', 'global', prod ? 600 : 1000)) return false;
+    return !ip || rateLimitBucket('auth-ip', ip, prod ? 60 : 1000);
+  }
+  return rateLimitBucket('api', ip ?? 'global', prod ? (ip ? 120 : 600) : 1000);
 }
 
-export async function rateLimitBucket(namespace: 'auth' | 'api' | 'avatar-upload', identity: string, limit: number) {
+export function rateLimitLogin(request: Request, email: string) {
+  const ip = trustedClientIp(request.headers) ?? 'unattributed';
+  const identity = JSON.stringify([ip, email.trim().toLowerCase()]);
+  return rateLimitBucket('login', identity, process.env.NODE_ENV === 'production' ? 10 : 1000);
+}
+
+export async function rateLimitBucket(namespace: 'auth-global' | 'auth-ip' | 'login' | 'api' | 'avatar-upload', identity: string, limit: number) {
   const prod = process.env.NODE_ENV === 'production';
-  const key = `equipedesk:${namespace}:${createHash('sha256').update(identity).digest('hex')}`;
   const url = process.env.RATE_LIMIT_REDIS_URL, token = process.env.RATE_LIMIT_REDIS_TOKEN;
+  const key = `equipedesk:${namespace}:${createHmac('sha256', token || 'local-development').update(namespace).update('\0').update(identity).digest('hex')}`;
   if (!url || !token) {
     if (prod) throw new Error('Rate limiter unavailable');
     return localLimit(key,limit);

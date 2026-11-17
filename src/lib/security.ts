@@ -1,4 +1,24 @@
+import { isIP } from 'node:net';
+
 export const production = () => process.env.NODE_ENV === 'production';
+
+export function trustedClientIp(headers: Headers, env: NodeJS.ProcessEnv = process.env) {
+  const name = env.VERCEL === '1' ? 'x-vercel-forwarded-for' : env.TRUST_PROXY === 'true' ? 'x-real-ip' : null;
+  const value = name ? headers.get(name)?.trim() : undefined;
+  if (!value) return null;
+  const version = isIP(value);
+  if (version === 4) return value;
+  if (version === 6 && !value.includes('%')) return new URL(`http://[${value}]`).hostname.slice(1, -1);
+  return null;
+}
+
+export function requestProtocol(urlProtocol: string, headers: Headers, env: NodeJS.ProcessEnv = process.env) {
+  if (env.VERCEL === '1' || env.TRUST_PROXY === 'true') {
+    const forwarded = headers.get('x-forwarded-proto');
+    if (forwarded === 'https' || forwarded === 'http') return forwarded;
+  }
+  return urlProtocol.replace(/:$/, '');
+}
 
 export function environmentProblems(env: NodeJS.ProcessEnv = process.env, options = { requireRedis: true }) {
   const problems: string[] = [];

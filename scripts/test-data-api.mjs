@@ -92,6 +92,11 @@ passed('Comando externo é recusado sem revelar o chamado');
 const race = await Promise.all([marina, rafa].map((user) => command(user, 'aurora', 'transition', { id: ticket.id, action: 'assign', version: 1 })));
 assert.equal(race.filter((result) => result.ok).length, 1);
 assert.match(race.find((result) => !result.ok).data.message, /^409:/);
+const winner = race[0].ok ? marina : rafa;
+const [assigned] = success(await request(ticketQuery, marina.token), 'Estado persistido após disputa');
+assert.equal(assigned.assignee_id, winner.id);
+assert.equal(assigned.status, 'in_progress');
+assert.equal(assigned.version, 2);
 const eventsQuery = `/rest/v1/ticket_events?select=id,kind&ticket_id=eq.${ticket.id}`;
 let events = success(await request(eventsQuery, marina.token), 'Histórico da disputa');
 assert.equal(events.filter((event) => event.kind === 'assign').length, 1);
@@ -123,4 +128,11 @@ assert.match(invalidReopen.data.message, /^422:/);
 events = success(await request(eventsQuery, marina.token), 'Histórico após falha');
 assert.equal(events.length, before);
 passed('Comentário e resolução funcionam; falha de reabertura preserva histórico');
+const reopened = success(await command(lucas, 'aurora', 'transition', {
+  id: ticket.id, action: 'reopen', version: 3, reason: 'O problema voltou após a resolução.',
+}), 'Reabertura pelo solicitante original');
+assert.equal(reopened.status, 'open');
+assert.equal(reopened.version, 4);
+assert.equal(reopened.assignee_id, null);
+passed('O solicitante reabre o próprio chamado resolvido com motivo');
 console.log(`${checks} verificações conectadas aprovadas. Chamado de evidência: ${ticket.id}`);

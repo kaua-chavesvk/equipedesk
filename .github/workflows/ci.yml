@@ -42,6 +42,10 @@ jobs:
           node scripts/seed-demo.mjs
           node scripts/test-data-api.mjs
           node scripts/test-avatar-storage.mjs
+      - name: Restore synthetic database backup and verify isolation
+        run: node scripts/test-backup-restore.mjs
+        env:
+          CONFIRM_SYNTHETIC_RESTORE: 'yes'
       - run: pnpm build
         env:
           DEMO_MODE: 'true'

@@ -62,7 +62,30 @@ O Supabase documenta seu algoritmo de armazenamento de senha em [Password securi
 1. Aplicar todas as migrações, inclusive `202611120001_platform_admins.sql` e `202611120002_command_validation.sql`, em staging; executar `pnpm db:test` e o teste conectado da API de dados.
 2. Configurar `NEXT_PUBLIC_SITE_URL` com a origem HTTPS exata, URL HTTPS e chave pública do Supabase. A chave administrativa não deve existir no processo web. Desabilitar `DEMO_MODE` para uso real.
 3. Configurar `RATE_LIMIT_REDIS_URL` e `RATE_LIMIT_REDIS_TOKEN` em um serviço Redis REST compatível com `EVAL`. Em produção, ausência ou falha do limitador retorna 503. O backend Redis foi testado por simulação, não conectado a um serviço real.
-4. Só ativar `TRUST_PROXY=true` quando o ingresso confiável remover/sobrescrever `X-Forwarded-For` e `X-Forwarded-Proto`. Sem essa garantia, o limite usa um bucket compartilhado e não confia no IP fornecido pelo cliente. Requisições atrás de um proxy que reescreva HTTPS para HTTP também exigem essa configuração correta para evitar redirecionamentos repetidos.
+4. Na Vercel, com a variável de sistema `VERCEL=1`, a aplicação usa um único IP válido de `X-Vercel-Forwarded-For`. Fora dela, configure `TRUST_PROXY=true` somente quando o ingresso sobrescrever `X-Real-IP` e `X-Forwarded-Proto` e o acesso direto à origem estiver bloqueado. A aplicação aceita apenas `http` ou `https` como valores encaminhados do protocolo.
+5. Em produção, `/api/auth` tem teto global de 600 requisições por minuto e 60 por IP conhecido. Login tem limite adicional de 10 por IP e e-mail normalizado. Quando o IP não está disponível, o limite de login é de 10 por e-mail, sob o teto global. Outras APIs mantêm 120 por IP conhecido e usam um teto compartilhado de 600 na ausência dele. Os limites são por janela de 60 segundos e as chaves usam HMAC com o token do Redis.
+6. Mantenha `ENFORCE_PLATFORM_ADMIN_AAL2=false` até preparar os administradores. Em homologação, implemente cadastro TOTP com `mfa.enroll` e desafio com `mfa.challengeAndVerify`. Valide renovação da sessão e recuperação para um administrador que perdeu o fator. A opção protege as rotas administrativas Next.js e a promoção a administrador global no workspace. Para cobrir acesso direto via PostgREST e RPC, a política precisa também ser aplicada no Supabase. Essa parte exige uma mudança de banco aprovada separadamente.
+
+## Revisão da Fase 2 em 17/11/2026
+
+A CSP candidata usa `base-uri 'none'` em `Content-Security-Policy-Report-Only`, junto à política aplicada com `base-uri 'self'`. O navegador permite observar as violações no console. A coleta centralizada depende de definir um destino de relatórios e revisar a retenção, porque relatórios podem incluir URLs da página. Os cabeçalhos desta entrega permitem a inspeção manual no navegador.
+
+Dependabot consulta os ecossistemas npm e GitHub Actions semanalmente. O workflow CodeQL usa JavaScript/TypeScript, modo de build `none`, análise de PRs para `main`, pushes na `main` e execução semanal. A permissão `security-events: write` fica restrita ao job de análise.
+
+A suíte `supabase/tests/isolation.test.sql` verifica isolamento e versões antigas. O script `scripts/test-data-api.mjs` já envia duas atribuições simultâneas por sessões distintas ao PostgreSQL local. A revisão acrescenta a verificação do responsável, estado e versão persistidos após a disputa e a reabertura pelo solicitante com motivo. A execução no CI anterior está registrada em https://github.com/kaua-chavesvk/equipedesk/actions/runs/44098181819. Os novos asserts precisam de uma nova execução com Supabase local. Esta máquina está sem Docker, Podman e psql.
+
+### Configurações de identidade observadas
+
+A consulta de configuração de produção retornou mínimo de seis caracteres, enquanto a aplicação e o arquivo local exigem oito. O tempo limite de inatividade hospedado está em `0s`. TOTP está habilitado no provedor para cadastro e verificação. A proteção de senhas vazadas precisa de confirmação no painel. O alinhamento de senha, o prazo de inatividade e a ativação de AAL2 devem ser ensaiados na homologação e publicados com os administradores preparados.
+
+A consulta de aceites mantém a checagem por usuário, versão de termos e versão de privacidade. O índice existente começa por `user_id`. Antes de adicionar cache, medir o tempo dessa consulta. Um cache positivo só preserva revogação imediata com invalidação confiável. Uma janela de TTL isolada altera essa garantia.
+
+### Entregas operacionais pendentes
+
+- SMTP e mensagens transacionais precisam de provedor, domínio remetente e conta de teste autorizada. Conferir entrega, links, expiração e recuperação em caixa real antes de registrar sucesso.
+- O ensaio de backup e restauração precisa de um destino separado. Restaurar, conferir migrações, comparar contagens e testar login, leitura autorizada, isolamento entre empresas e Storage. O backup de banco e a cópia dos arquivos do Storage precisam ser verificados juntos.
+- Os logs estruturados existentes informam rota padronizada, status, duração e ID da requisição. Alertas precisam de destino e critério operacional definidos. Monitoramento externo de erros exige configuração do serviço.
+- Perfis e a linha do tempo unificada já existem. A API oferece revogação de convites, mas ainda precisa de listagem administrativa, tratamento de expirados e fluxo de reenvio.
 5. Configurar certificado TLS, redirecionamento na borda, limites de corpo e proteção contra DDoS na hospedagem. HSTS inclui subdomínios: todos devem suportar HTTPS.
 6. No Supabase hospedado, definir expiração de e-mail/OTP de 900 segundos, confirmação de e-mail, URLs de callback exatas e revisar limites próprios de Auth e CAPTCHA. O limitador do app não substitui os controles do endpoint Auth público do Supabase.
 7. Conectar logs da hospedagem a retenção e alertas para aumento de `auth_failed`, `csrf_rejected`, `rate_limit`, `access_denied`, `environment_invalid` e `rate_limit_unavailable`. Evitar registrar URLs de convites e query strings de callbacks no ingresso.

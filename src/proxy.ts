@@ -2,7 +2,7 @@ import { boundedSupabaseFetch } from '@/lib/supabase/fetch';
 import { LEGAL_VERSION } from '@/lib/legal';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { allowedMutation, contentSecurityPolicy, environmentProblems, production, securityEvent } from '@/lib/security';
+import { allowedMutation, contentSecurityPolicy, environmentProblems, production, requestProtocol, securityEvent } from '@/lib/security';
 import { rateLimit } from '@/lib/rate-limit';
 
 export async function proxy(request: NextRequest) {
@@ -14,6 +14,10 @@ export async function proxy(request: NextRequest) {
   headers.set('x-nonce',nonce);headers.set('Content-Security-Policy',csp);
   const finish=(response:NextResponse)=>{
     response.headers.set('Content-Security-Policy',csp);
+    if (prod) {
+      response.headers.set('Content-Security-Policy-Report-Only',
+        csp.replace("base-uri 'self'", "base-uri 'none'").replace(' upgrade-insecure-requests;', ''));
+    }
     response.headers.set('X-Request-Id',id);
     response.headers.set('Cache-Control','private, no-store');
     return response;
@@ -26,7 +30,7 @@ export async function proxy(request: NextRequest) {
   const site=process.env.NEXT_PUBLIC_SITE_URL ?? request.nextUrl.origin;
   const path=request.nextUrl.pathname;
   if(prod){
-    const protocol=process.env.TRUST_PROXY==='true'?request.headers.get('x-forwarded-proto')??request.nextUrl.protocol.replace(':',''):request.nextUrl.protocol.replace(':','');
+    const protocol=requestProtocol(request.nextUrl.protocol, request.headers);
     if(protocol!=='https')return finish(NextResponse.redirect(new URL(path+request.nextUrl.search,site),308));
   }
   if(/\/(?:\.env(?:\.[^/]*)?|\.git|\.tools|node_modules)(?:\/|$)|\.(?:sql|map|bak|log)$/i.test(path))return deny(404,'private_path','Recurso não encontrado.');

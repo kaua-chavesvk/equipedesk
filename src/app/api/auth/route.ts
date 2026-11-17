@@ -6,6 +6,7 @@ import { authInput } from '@/lib/http/auth-input';
 import { configured, supabaseServer } from '@/lib/supabase/server';
 import { initializeDemo } from '@/lib/data';
 import { failure, HttpError } from '@/lib/http/api';
+import { rateLimitLogin } from '@/lib/rate-limit';
 
 async function handlePOST(request: Request) {
   try {
@@ -44,6 +45,14 @@ async function handlePOST(request: Request) {
         }));
         break;
       case 'login':
+        {
+          let allowed: boolean;
+          try { allowed = await rateLimitLogin(request, input.email); }
+          catch { throw new HttpError(503, 'Serviço temporariamente indisponível.'); }
+          if (!allowed) return NextResponse.json({ error: 'Muitas requisições. Aguarde um minuto.' }, {
+            status: 429, headers: { 'Retry-After': '60' },
+          });
+        }
         ({ error } = await db.auth.signInWithPassword({ email: input.email, password: input.password }));
         break;
     }
