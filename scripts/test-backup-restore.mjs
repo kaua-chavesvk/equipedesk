@@ -19,7 +19,7 @@ function docker(args, input) {
 }
 
 function sql(target, statement) {
-  return docker(['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', target,
+  return docker(['exec', '-i', container, 'psql', '-X', '-U', 'supabase_admin', '-d', target,
     '-v', 'ON_ERROR_STOP=1', '-At'], statement).trim();
 }
 
@@ -32,10 +32,10 @@ const fingerprint = tables.map(table =>
 try {
   const source = sql('postgres', fingerprint);
   assert.equal(sql('postgres', 'select count(*) >= 4 from auth.users;'), 't', 'Prepare o seed local.');
-  docker(['exec', container, 'pg_dump', '-U', 'postgres', '-d', 'postgres', '-Fc', '-f', archive]);
-  docker(['exec', container, 'createdb', '-U', 'postgres', '--template=template0', database]);
+  docker(['exec', container, 'pg_dump', '-U', 'supabase_admin', '-d', 'postgres', '-Fc', '-f', archive]);
+  docker(['exec', container, 'createdb', '-U', 'supabase_admin', '--template=template0', database]);
   created = true;
-  docker(['exec', container, 'pg_restore', '-U', 'postgres', '-d', database,
+  docker(['exec', container, 'pg_restore', '-U', 'supabase_admin', '-d', database,
     '--exit-on-error', '--single-transaction', archive]);
   assert.equal(sql(database, fingerprint), source, 'Dados restaurados divergem da origem.');
 
@@ -75,6 +75,6 @@ try {
   `);
   console.log('Backup restaurado em banco descartável. Dados, RLS e bloqueio de escrita direta conferidos.');
 } finally {
-  if (created) docker(['exec', container, 'dropdb', '-U', 'postgres', '--force', database]);
+  if (created) docker(['exec', container, 'dropdb', '-U', 'supabase_admin', '--force', database]);
   docker(['exec', container, 'rm', '-f', '--', archive]);
 }
