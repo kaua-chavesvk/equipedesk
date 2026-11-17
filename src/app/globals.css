@@ -250,6 +250,10 @@ tbody tr:hover{background:var(--hover)}
 .member-row select{width:154px;font-size:0.875rem}
 .role-pill{font-size:0.75rem;background:var(--canvas);border:1px solid var(--line);padding:6px 10px}
 .team-note{display:flex;align-items:flex-start;gap:12px;background:var(--canvas);padding:18px;margin-top:20px;color:var(--muted);font-size:0.8125rem}
+.invitations-panel{margin-top:20px}
+.invitations-panel .tabs{margin-block:12px}
+.invitations-panel .member-row{flex-wrap:wrap}
+.invitations-panel .member-info{min-width:0;overflow-wrap:anywhere}
 .modal-backdrop{position:fixed;inset:0;z-index:100;background:#20212666;display:flex;align-items:center;justify-content:center;padding:24px}
 .modal{width:500px;max-height:90svh;overflow-y:auto;position:relative;padding:32px}
 .modal h2{margin-top:16px;font-size:1.75rem}

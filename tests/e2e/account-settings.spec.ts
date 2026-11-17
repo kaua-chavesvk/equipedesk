@@ -36,6 +36,31 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await expect(page.getByRole('heading', { name: 'Tickets', exact: true })).toBeVisible();
   await page.goto('/e/aurora/equipe');
   await expect(page.getByRole('heading', { name: 'Team', exact: true })).toBeVisible();
+  const invitations = page.getByRole('region', { name: 'Company invitations' });
+  await expect(invitations.getByText('No pending invitations.')).toBeVisible();
+  const email = 'renewal-browser@aurora.example';
+  const issued = await page.request.post('/api/empresas/aurora/convites', {
+    headers: { Origin: origin }, data: { email, role: 'requester' },
+  });
+  expect(issued.status()).toBe(201);
+  const originalInvitation = await issued.json();
+  await page.reload();
+  const row = invitations.getByRole('listitem').filter({ hasText: email });
+  await expect(row).toBeVisible();
+  page.once('dialog', dialog => dialog.accept());
+  await row.getByRole('button', { name: 'Generate new link' }).click();
+  const newLink = invitations.getByRole('textbox', { name: 'Invitation link' });
+  await expect(newLink).toHaveValue(/\/convite\/[a-f0-9]{64}$/);
+  expect(await newLink.inputValue()).not.toContain(originalInvitation.token);
+  await expect(invitations.getByText('New link ready to share.')).toBeVisible();
+  // Wait until the replacement appears in the refreshed list before revoking it.
+  await expect(invitations.getByRole('listitem').filter({ hasText: email })).toHaveCount(1);
+  page.once('dialog', dialog => dialog.accept());
+  await row.getByRole('button', { name: 'Revoke invitation' }).click();
+  await expect(invitations.getByText('Invitation revoked.')).toBeVisible();
+  await expect(row).toHaveCount(0);
+  await invitations.getByRole('button', { name: 'Expired', exact: true }).click();
+  await expect(invitations.getByText('No expired invitations.')).toBeVisible();
   await page.goto('/conta/configuracoes');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

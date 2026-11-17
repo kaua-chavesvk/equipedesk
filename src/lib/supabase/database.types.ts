@@ -37,6 +37,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      renew_invitation: { Args: { p_slug: string; p_id: string }; Returns: Json };
       account_profile_update: { Args: { p_name: string; p_version: number }; Returns: Json };
       account_preferences_update: { Args: { p_patch: Json; p_version: number }; Returns: Json };
       account_workspace_preference_update: { Args: { p_slug: string; p_view: string; p_queue_view: string; p_version: number }; Returns: Json };

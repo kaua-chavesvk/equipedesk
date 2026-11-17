@@ -212,7 +212,7 @@ As migrações `202611120003_privacy.sql` e `202611120004_retention.sql` já for
 - Concluir o aceite dos termos pelo titular da conta administrativa e validar a entrada no workspace.
 - Executar as jornadas completas no Supabase real: criação de empresa, abertura de chamado, atribuição, comentário, resolução, reabertura, convites e troca de empresa com papéis diferentes.
 - Executar os testes SQL e da API de dados para RLS, acesso entre empresas, proteção do último administrador e disputas concorrentes. Esses testes não foram executados no banco remoto durante o provisionamento.
-- Adicionar perfis para identificação de membros, autores e responsáveis; completar a linha do tempo unificada e a gestão de convites pendentes; revisar os limites restantes entre SQL e HTTP.
+- Em **Equipe → Convites da empresa**, administradores podem consultar pendentes e expirados, revogar um convite e gerar um novo link para compartilhar. Renovar revoga o convite anterior na mesma transação. O reenvio automático depende do provedor de e-mail transacional.
 - Configurar e verificar e-mails transacionais, templates hospedados, callbacks e recuperação de senha com entrega real.
 - Confirmar backups, restauração, retenção de logs, alertas e monitoramento; agendar e validar a rotina administrativa de retenção em ambiente apropriado.
 - Completar os dados públicos de identificação ainda ausentes e a revisão dos contratos, operadores, licenças e procedimentos de privacidade descritos nos documentos específicos.
