@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { DEFAULT_ACCOUNT_PREFERENCES, preferencesSchema, type AccountPreferences } from '@/features/account-settings/contracts';
 import type { UserPreferences } from '@/lib/supabase/database.types';
 import { AvatarSettings } from './avatar-settings';
+import { rememberLocale } from '@/features/i18n/language-select';
 const subscribe = () => () => {};
 
 const copy = {
@@ -72,6 +73,7 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
         const updated = await response.json() as UserPreferences;
         setSaved(updated);
         setDraft(updated);
+        rememberLocale(updated.locale);
       }
       toast.success(t.saved);
       router.refresh();

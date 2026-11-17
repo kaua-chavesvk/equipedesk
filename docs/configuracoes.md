@@ -226,3 +226,11 @@ O usuário aprovou este desenho em 16/11/2026. Essa aprovação autoriza a Fase 
 Em 16/11/2026, a consulta `vercel env ls --environment preview` retornou uma lista vazia. O preview funcional depende de configurar a instância de teste e as variáveis desse ambiente.
 
 O [CI do commit 836f139](https://github.com/kaua-chavesvk/equipedesk/actions/runs/43912530885/attempts/2) aprovou 99 testes unitários, SQL, acesso pela API de dados, Storage HTTP com três sessões, build, dois testes de navegador com Supabase local e 47 testes da demonstração, com um ignorado. A jornada autenticada verificou nome, tema, escala, idioma da tela, upload normalizado e remoção com invalidação da URL anterior. A tradução das demais telas e a homologação hospedada seguem pendentes. A alteração de e-mail permanece em modo de leitura.
+
+### Ampliação aprovada em 17/11/2026
+
+O usuário confirmou o funcionamento do cadastro e autorizou publicar as configurações no site oficial. Pediu ampliar o inglês para toda a interface e substituir os controles horizontal e vertical da foto por arraste direto.
+
+A implementação usa um catálogo comum para português e inglês, com idioma definido no servidor e compartilhado pelos componentes. Contas autenticadas usam a preferência persistida. Visitantes usam o cookie necessário `desk_locale`, com duração de um ano. Datas acompanham o idioma selecionado e o fuso escolhido. A tradução de leitura dos documentos legais é gerada no servidor a partir da árvore estática. Os textos aceitos em português continuam referenciados pela versão original.
+
+O recorte usa Pointer Events para mouse e toque, captura do ponteiro durante o arraste, zoom de 1 a 3 e teclas de direção. Home centraliza a posição e o botão de centralização também restaura o zoom. Prévia e servidor usam o mesmo tamanho de recorte em pixels e coordenadas normalizadas, com limites nas bordas.

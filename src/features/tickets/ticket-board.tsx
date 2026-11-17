@@ -1,4 +1,6 @@
 'use client';
+import { useTranslations } from '@/features/i18n/context';
+
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -18,11 +20,12 @@ export function TicketBoard<T extends BoardTicket>({ tickets, base, busy, destin
   onMove: (ticket: T, status: TicketStatus) => void; assignee: (id: string | null) => string;
   priorities: Record<string, string>;
 }) {
+  const t = useTranslations();
   const [dragged, setDragged] = useState<T | null>(null);
   return <div className="ticket-board">{columns.map(([status, title]) => {
     const cards = tickets.filter(ticket => ticket.status === status);
     const acceptsDrop = !busy && dragged && destination(dragged) === status;
-    return <section key={status} className="board-column" aria-label={title} data-drop={Boolean(acceptsDrop)}
+    return <section key={status} className="board-column" aria-label={t(title)} data-drop={Boolean(acceptsDrop)}
       onDragOver={event => { if (acceptsDrop) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }}
       onDrop={event => {
         const ticket = tickets.find(item => item.id === event.dataTransfer.getData('application/x-equipedesk-ticket'));
@@ -31,7 +34,7 @@ export function TicketBoard<T extends BoardTicket>({ tickets, base, busy, destin
         onMove(ticket, status);
         setDragged(null);
       }}>
-      <h3>{title}<span className="count-badge">{cards.length}</span></h3>
+      <h3>{t(title)}<span className="count-badge">{cards.length}</span></h3>
       {cards.map(ticket => {
         const next = destination(ticket);
         return <article key={ticket.id} className="board-card" draggable={Boolean(next) && !busy}
@@ -47,11 +50,11 @@ export function TicketBoard<T extends BoardTicket>({ tickets, base, busy, destin
           <Link draggable={false} href={base + '/chamados/' + ticket.id}>{ticket.title}</Link>
           <small>{assignee(ticket.assignee_id)}</small>
           {next && <button className="button secondary" disabled={busy} onClick={() => onMove(ticket, next)}>
-            {next === 'open' ? 'Reabrir' : next === 'in_progress' ? 'Assumir' : 'Resolver'}
+            {next === 'open' ? t("Reabrir") : next === 'in_progress' ? t("Assumir") : t("Resolver")}
           </button>}
         </article>;
       })}
-      {!cards.length && <p className="muted">Nenhum chamado nesta página.</p>}
+      {!cards.length && <p className="muted">{t("Nenhum chamado nesta página.")}</p>}
     </section>;
   })}</div>;
 }

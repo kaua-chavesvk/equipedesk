@@ -494,6 +494,9 @@ html.dark[data-contrast="high"],.settings-preview.dark[data-contrast="high"] {
 .avatar-violet{background:#eee7ff;color:#442183}
 .avatar-green{background:#dff4e7;color:#12462b}
 .avatar-orange{background:#ffe9d8;color:#6c320c}
-.avatar-crop-preview{width:min(100%,224px);aspect-ratio:1;position:relative;overflow:hidden;margin:0 auto}
+.avatar-crop-preview{width:min(100%,320px);aspect-ratio:1;position:relative;overflow:hidden;margin:0 auto;touch-action:none;cursor:grab;user-select:none;border-radius:50%;background:var(--surface);outline-offset:5px}
+.avatar-crop-preview:active{cursor:grabbing}
+.avatar-crop-preview[aria-disabled="true"]{cursor:wait}
+.avatar-crop-preview img{pointer-events:none}
 .avatar-crop-controls{border:0;padding:0;display:grid;gap:8px;margin:12px 0}
 @media(max-width:760px){.settings-columns,.settings-fields{grid-template-columns:minmax(0,1fr)}}

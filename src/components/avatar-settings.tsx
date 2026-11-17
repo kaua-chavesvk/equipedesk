@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AVATAR_SOURCE_LIMIT } from '@/features/account-settings/contracts';
@@ -10,15 +10,17 @@ import { ProfileAvatar } from './profile-avatar';
 
 const copy = {
   'pt-BR': { title: 'Foto de perfil', help: 'Visível para colegas de empresas que você compartilha.',
-    choose: 'Selecionar foto', preview: 'Recortar foto', zoom: 'Zoom', x: 'Posição horizontal', y: 'Posição vertical',
+    choose: 'Selecionar foto', preview: 'Recortar foto', zoom: 'Zoom',
     save: 'Salvar foto', remove: 'Remover foto', pending: 'Processando…', invalid: 'Escolha um JPEG, PNG ou WebP de até 2 MiB.',
     saved: 'Foto salva.', removed: 'Foto removida do perfil.', cleanup: 'Foto retirada do perfil. A exclusão do arquivo está pendente.',
-    error: 'Não foi possível atualizar a foto. Tente novamente.', instructions: 'Use os controles para ajustar o enquadramento.' },
+    error: 'Não foi possível atualizar a foto. Tente novamente.', instructions: 'Arraste a foto para ajustar o enquadramento. Use o zoom para aproximar. Com o teclado, use as setas para mover e Home para centralizar.',
+    position: 'Posicionar foto', reset: 'Centralizar foto' },
   en: { title: 'Profile photo', help: 'Visible to colleagues in companies you share.',
-    choose: 'Choose photo', preview: 'Crop photo', zoom: 'Zoom', x: 'Horizontal position', y: 'Vertical position',
+    choose: 'Choose photo', preview: 'Crop photo', zoom: 'Zoom',
     save: 'Save photo', remove: 'Remove photo', pending: 'Processing…', invalid: 'Choose a JPEG, PNG or WebP up to 2 MiB.',
     saved: 'Photo saved.', removed: 'Photo removed from your profile.', cleanup: 'Photo hidden. File deletion is pending.',
-    error: 'Could not update your photo. Try again.', instructions: 'Use the controls to adjust your crop.' },
+    error: 'Could not update your photo. Try again.', instructions: 'Drag the photo to adjust the crop. Use zoom to get closer. With a keyboard, use arrow keys to move and Home to centre.',
+    position: 'Position photo', reset: 'Centre photo' },
 } as const;
 
 export function AvatarSettings({ profile, uploadEnabled, locale, url }: {
@@ -31,6 +33,10 @@ export function AvatarSettings({ profile, uploadEnabled, locale, url }: {
   const [crop, setCrop] = useState({ zoom: 1, x: .5, y: .5 });
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [dimensions, setDimensions] = useState({ width: 1, height: 1 });
+  const drag = useRef<{ pointerId: number; clientX: number; clientY: number; x: number; y: number; size: number } | null>(null);
+  const side = Math.max(1, Math.floor(Math.min(dimensions.width, dimensions.height) / crop.zoom));
+  const clamp = (value: number) => Math.max(0, Math.min(1, value));
   useEffect(() => () => { if (selection) URL.revokeObjectURL(selection.url); }, [selection]);
 
   function upload() {
@@ -80,19 +86,52 @@ export function AvatarSettings({ profile, uploadEnabled, locale, url }: {
       if (!file) return;
       if (file.size > AVATAR_SOURCE_LIMIT || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { toast.error(t.invalid); return; }
       setCrop({ zoom: 1, x: .5, y: .5 });
+      setDimensions({ width: 1, height: 1 });
       setSelection({ file, url: URL.createObjectURL(file) });
     }} /></label>}
     {profile.hasAvatar && <button type="button" className="button secondary" disabled={busy} onClick={() => void remove()}>{t.remove}</button>}
     {selection && <DeskDialog title={t.preview} description={t.instructions} lang={locale} open onOpenChange={open => { if (!open && !busy) setSelection(null); }}>
-      <div className="avatar-crop-preview"><Image src={selection.url} alt="" fill unoptimized
-        style={{ objectFit: 'cover', objectPosition: `${crop.x * 100}% ${crop.y * 100}%`, transform: `scale(${crop.zoom})`, transformOrigin: `${crop.x * 100}% ${crop.y * 100}%` }} /></div>
+      <div className="avatar-crop-preview" role="group" tabIndex={0} aria-label={t.position} aria-disabled={busy}
+        onPointerDown={event => {
+          if (busy || event.button !== 0 || !event.isPrimary) return;
+          event.currentTarget.focus();
+          event.currentTarget.setPointerCapture(event.pointerId);
+          drag.current = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY,
+            x: crop.x, y: crop.y, size: event.currentTarget.getBoundingClientRect().width };
+        }}
+        onPointerMove={event => {
+          const start = drag.current;
+          if (busy || !start || start.pointerId !== event.pointerId) return;
+          const overflowX = (dimensions.width - side) * start.size / side;
+          const overflowY = (dimensions.height - side) * start.size / side;
+          setCrop(current => ({ ...current,
+            x: overflowX > 0 ? clamp(start.x - (event.clientX - start.clientX) / overflowX) : .5,
+            y: overflowY > 0 ? clamp(start.y - (event.clientY - start.clientY) / overflowY) : .5 }));
+        }}
+        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
+        onLostPointerCapture={() => { drag.current = null; }}
+        onKeyDown={event => {
+          if (busy || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home'].includes(event.key)) return;
+          event.preventDefault();
+          const step = event.shiftKey ? .1 : .02;
+          setCrop(current => event.key === 'Home' ? { ...current, x: .5, y: .5 } : { ...current,
+            x: clamp(current.x + (event.key === 'ArrowLeft' ? step : event.key === 'ArrowRight' ? -step : 0)),
+            y: clamp(current.y + (event.key === 'ArrowUp' ? step : event.key === 'ArrowDown' ? -step : 0)) });
+        }}>
+        <Image src={selection.url} alt="" width={dimensions.width} height={dimensions.height} unoptimized draggable={false}
+          onLoad={event => setDimensions({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+          onError={() => { setSelection(null); toast.error(t.invalid); }}
+          style={{ width: (100 * dimensions.width / side) + '%', height: (100 * dimensions.height / side) + '%',
+            maxWidth: 'none', position: 'absolute', left: (-100 * (dimensions.width - side) * crop.x / side) + '%',
+            top: (-100 * (dimensions.height - side) * crop.y / side) + '%' }} />
+      </div>
       <fieldset disabled={busy} className="avatar-crop-controls">
-        {([['zoom', t.zoom, 1, 3], ['x', t.x, 0, 1], ['y', t.y, 0, 1]] as const).map(([key, label, min, max]) =>
-          <label key={key}>{label}<input type="range" min={min} max={max} step={.01} value={crop[key]}
-            onChange={event => setCrop(values => ({ ...values, [key]: Number(event.target.value) }))} /></label>)}
+        <label>{t.zoom}<input type="range" min={1} max={3} step={.01} value={crop.zoom}
+          onChange={event => { drag.current = null; setCrop(values => ({ ...values, zoom: Number(event.target.value) })); }} /></label>
+        <button type="button" className="button secondary" onClick={() => setCrop({ zoom: 1, x: .5, y: .5 })}>{t.reset}</button>
       </fieldset>
       {busy && <progress aria-label={t.pending} value={progress} max={100} />}
-      <button type="button" className="button primary" disabled={busy} onClick={upload}>{busy ? t.pending : t.save}</button>
+      <button type="button" className="button primary" disabled={busy || dimensions.width < 2} onClick={upload}>{busy ? t.pending : t.save}</button>
     </DeskDialog>}
   </section>;
 }

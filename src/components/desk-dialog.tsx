@@ -1,4 +1,6 @@
 'use client';
+import { useTranslations } from '@/features/i18n/context';
+
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, useReducedMotion } from 'motion/react';
@@ -11,6 +13,7 @@ export function DeskDialog({ title, description, open, onOpenChange, children, o
   children: React.ReactNode; onCloseAutoFocus?: (event: Event) => void;
   lang?: string;
 }) {
+  const t = useTranslations();
   const preferences = useContext(AccountAppearance);
   const systemReduction = useReducedMotion();
   const reducedMotion = preferences?.motion === 'reduce' || systemReduction;
@@ -22,7 +25,7 @@ export function DeskDialog({ title, description, open, onOpenChange, children, o
           animate={{ opacity: 1, scale: 1 }} transition={{ duration: reducedMotion ? 0 : 0.16 }}>
           <Dialog.Title>{title}</Dialog.Title>
           <Dialog.Description className="muted">{description}</Dialog.Description>
-          <Dialog.Close className="icon-button desk-dialog-close" aria-label={lang === 'en' ? 'Close' : 'Fechar'}><X size={20}/></Dialog.Close>
+          <Dialog.Close className="icon-button desk-dialog-close" aria-label={lang === 'en' ? 'Close' : t("Fechar")}><X size={20}/></Dialog.Close>
           {children}
         </motion.div>
       </Dialog.Content>
