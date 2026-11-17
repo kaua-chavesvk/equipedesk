@@ -20,3 +20,17 @@ const { error: cleanupError } = await db.from('privacy_requests').delete()
   .eq('kind', 'access')
   .eq('details', 'Pedido para verificar autorização de resposta.');
 if (cleanupError) throw new Error('Falha ao limpar os pedidos da conta de teste.');
+
+// Synthetic platform administrator, restricted to the disposable local Auth service.
+const adminEmail = 'mfa-admin@security.example';
+let admin = data.users.find(user => user.email === adminEmail);
+if (!admin) {
+  const created = await db.auth.admin.createUser({ email: adminEmail, password, email_confirm: true });
+  if (created.error) throw new Error('Falha ao criar administrador sintético.');
+  admin = created.data.user;
+} else {
+  const updated = await db.auth.admin.updateUserById(admin.id, { password });
+  if (updated.error) throw new Error('Falha ao preparar administrador sintético.');
+}
+const grant = await db.from('platform_admins').upsert({ user_id: admin.id });
+if (grant.error) throw new Error('Falha ao conceder papel ao administrador sintético.');

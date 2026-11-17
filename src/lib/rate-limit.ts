@@ -29,7 +29,7 @@ export function rateLimitLogin(request: Request, email: string) {
   return rateLimitBucket('login', identity, process.env.NODE_ENV === 'production' ? 10 : 1000);
 }
 
-export async function rateLimitBucket(namespace: 'auth-global' | 'auth-ip' | 'login' | 'api' | 'avatar-upload', identity: string, limit: number) {
+export async function rateLimitBucket(namespace: 'auth-global' | 'auth-ip' | 'login' | 'api' | 'avatar-upload' | 'admin-mfa', identity: string, limit: number) {
   const prod = process.env.NODE_ENV === 'production';
   const url = process.env.RATE_LIMIT_REDIS_URL, token = process.env.RATE_LIMIT_REDIS_TOKEN;
   const key = `equipedesk:${namespace}:${createHmac('sha256', token || 'local-development').update(namespace).update('\0').update(identity).digest('hex')}`;

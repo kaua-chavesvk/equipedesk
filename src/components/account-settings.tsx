@@ -41,10 +41,11 @@ const copy = {
   },
 } as const;
 
-export function AccountSettings({ preferences, profile, email, back, avatars, photoUrl }: {
+export function AccountSettings({ preferences, profile, email, back, avatars, photoUrl, platformAdmin }: {
   preferences: UserPreferences;
   profile: { display_name: string; version: number; avatar_version: number; hasAvatar: boolean };
   email: string; back?: string; avatars: boolean; photoUrl?: string | null;
+  platformAdmin?: boolean;
 }) {
   const router = useRouter();
   const t = copy[preferences.locale];
@@ -140,6 +141,7 @@ export function AccountSettings({ preferences, profile, email, back, avatars, ph
         {(avatars || profile.hasAvatar) && <AvatarSettings profile={profile} uploadEnabled={avatars} locale={preferences.locale} url={photoUrl} />}
         <dl className="settings-email"><dt>{t.email}</dt><dd>{email}</dd></dl>
         <ul className="settings-links">
+          {platformAdmin && <li><Link className="text-link" href="/conta/seguranca">{preferences.locale === 'en' ? 'Two-factor authentication' : 'Autenticação em dois fatores'}</Link></li>}
           <li><Link className="text-link" href="/redefinir-senha">{t.password}</Link></li>
           <li><Link className="text-link" href="/meus-dados">{t.privacy}</Link></li>
           <li><Link className="text-link" href="/privacidade#cookies">{t.cookies}</Link></li>

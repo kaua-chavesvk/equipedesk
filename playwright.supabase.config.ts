@@ -9,7 +9,7 @@ if (!supabase || !['localhost', '127.0.0.1'].includes(new URL(supabase).hostname
 const origin = 'http://127.0.0.1:3107';
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: ['**/admin-access.spec.ts', '**/account-settings.spec.ts'],
+  testMatch: ['**/admin-access.spec.ts', '**/account-settings.spec.ts', '**/admin-mfa.spec.ts'],
   workers: 1,
   timeout: 60_000,
   use: { ...devices['Desktop Chrome'], baseURL: origin, trace: 'off', screenshot: 'off', video: 'off' },
@@ -17,6 +17,6 @@ export default defineConfig({
     command: 'pnpm exec next dev --hostname 127.0.0.1 --port 3107',
     url: origin,
     timeout: 120000,
-    env: { NEXT_PUBLIC_SITE_URL: origin, DEMO_MODE: 'false', SUPABASE_SERVICE_ROLE_KEY: '' },
+    env: { NEXT_PUBLIC_SITE_URL: origin, DEMO_MODE: 'false', SUPABASE_SERVICE_ROLE_KEY: '', ENFORCE_PLATFORM_ADMIN_AAL2: 'true' },
   },
 });

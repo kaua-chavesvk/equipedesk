@@ -209,6 +209,14 @@ As migrações `202611120003_privacy.sql` e `202611120004_retention.sql` já for
 
 ## Pendências e próximos passos
 
+### Segundo fator dos administradores
+
+Administradores gerais cadastrados em `platform_admins` têm acesso a **Configurações → Autenticação em dois fatores** e à rota `/conta/seguranca`. O fluxo usa TOTP do Supabase: cadastrar um autenticador por QR code ou chave manual, confirmar um código de seis dígitos e confirmar novamente após um novo login. A chave só aparece na resposta de cadastro, permanece em memória na tela e não integra logs ou armazenamento da aplicação. Cadastros pendentes podem ser cancelados; fatores já confirmados não podem ser removidos pela interface.
+
+A API `/api/conta/mfa` verifica sessão e papel global em todas as chamadas. Mutações têm limite adicional de dez tentativas por minuto por administrador, com recusa em caso de indisponibilidade do Redis. As respostas são privadas e sem cache. Não há nova dependência, chave administrativa no processo web ou alteração de RLS.
+
+Mantenha `ENFORCE_PLATFORM_ADMIN_AAL2=false` no ambiente hospedado até validar cadastro, novo login e recuperação operacional em homologação. Ativar a opção exige AAL2 nas operações administrativas Next.js já protegidas; não adiciona enforcement ao PostgREST ou RPC direto. O roteiro de ativação e recuperação está em [MFA administrativo](docs/admin-mfa.md). O Supabase local do CI habilita TOTP e o teste conectado ativa a exigência de AAL2.
+
 - Concluir o aceite dos termos pelo titular da conta administrativa e validar a entrada no workspace.
 - Executar as jornadas completas no Supabase real: criação de empresa, abertura de chamado, atribuição, comentário, resolução, reabertura, convites e troca de empresa com papéis diferentes.
 - Executar os testes SQL e da API de dados para RLS, acesso entre empresas, proteção do último administrador e disputas concorrentes. Esses testes não foram executados no banco remoto durante o provisionamento.
