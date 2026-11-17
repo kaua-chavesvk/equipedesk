@@ -9,6 +9,7 @@ const container = 'supabase_db_equipedesk';
 const suffix = randomUUID().replaceAll('-', '');
 const database = 'equipedesk_restore_' + suffix;
 const archive = '/tmp/equipedesk-restore-' + suffix + '.dump';
+const restoreList = '/tmp/equipedesk-restore-' + suffix + '.list';
 const hbaBackup = '/tmp/equipedesk-hba-' + suffix;
 let created = false;
 let socketAuthEnabled = false;
@@ -46,10 +47,17 @@ try {
   const source = sql('postgres', fingerprint);
   assert.equal(sql('postgres', 'select count(*) >= 4 from auth.users;'), 't', 'Prepare o seed local.');
   docker(['exec', container, 'pg_dump', '-U', 'supabase_admin', '-d', 'postgres', '-Fc', '-f', archive]);
+  // pg_graphql creates its public wrapper through Supabase's extension hooks.
+  // A bare database has no wrapper to receive the source wrapper's ACL.
+  const entries = docker(['exec', container, 'pg_restore', '--list', archive]);
+  const portableEntries = entries.split('\n').filter(line =>
+    !/^\d+; \d+ \d+ ACL graphql_public FUNCTION graphql\(/.test(line),
+  ).join('\n');
+  docker(['exec', '-i', container, 'sh', '-ec', 'cat > "$1"', 'restore-test', restoreList], portableEntries);
   docker(['exec', container, 'createdb', '-U', 'supabase_admin', '--template=template0', database]);
   created = true;
   docker(['exec', container, 'pg_restore', '-U', 'supabase_admin', '-d', database,
-    '--exit-on-error', '--single-transaction', archive]);
+    '--exit-on-error', '--single-transaction', '--use-list', restoreList, archive]);
   assert.equal(sql(database, fingerprint), source, 'Dados restaurados divergem da origem.');
 
   sql(database, `
@@ -97,5 +105,5 @@ try {
     }
   }
 } finally {
-  if (socketAuthEnabled) docker(['exec', container, 'rm', '-f', '--', archive]);
+  if (socketAuthEnabled) docker(['exec', container, 'rm', '-f', '--', archive, restoreList]);
 }
