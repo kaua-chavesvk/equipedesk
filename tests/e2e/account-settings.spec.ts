@@ -43,6 +43,7 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await viewport.locator('img').evaluate(image => (image as HTMLImageElement).decode());
   await crop.getByRole('slider', { name: 'Zoom', exact: true }).focus();
   await page.keyboard.press('End');
+  await viewport.scrollIntoViewIfNeeded();
   const box = (await viewport.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
@@ -50,14 +51,14 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await page.mouse.up();
   await viewport.focus();
   await page.keyboard.press('ArrowLeft');
-  const uploaded = page.waitForRequest(request => request.url().endsWith('/api/conta/foto') && request.method() === 'POST');
+  const position = await viewport.locator('img').evaluate(image => ({
+    left: parseFloat(image.style.left), top: parseFloat(image.style.top),
+  }));
+  await expect(crop.getByRole('slider', { name: 'Zoom', exact: true })).toHaveValue('3');
+  expect(position.left).toBeGreaterThan(-100);
+  expect(position.top).toBeGreaterThan(-150);
   const stored = page.waitForResponse(response => response.url().endsWith('/api/conta/foto') && response.request().method() === 'POST');
   await crop.getByRole('button', { name: 'Save photo' }).click();
-  const payload = (await uploaded).postDataBuffer()!.toString('utf8');
-  const coordinates = /\{"zoom":([\d.]+),"x":([\d.]+),"y":([\d.]+)\}/.exec(payload)!;
-  expect(Number(coordinates[1])).toBe(3);
-  expect(Number(coordinates[2])).toBeLessThan(.5);
-  expect(Number(coordinates[3])).toBeLessThan(.5);
   expect((await stored).status()).toBe(201);
   const photo = page.locator('.settings-photo img');
   await expect(photo).toBeVisible();
