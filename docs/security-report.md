@@ -68,6 +68,8 @@ O Supabase documenta seu algoritmo de armazenamento de senha em [Password securi
 
 ## Revisão da Fase 2 em 17/11/2026
 
+A auditoria de dependências passou a apontar `GHSA-fc5q-39xc-vjpf`, atualizado em 17/11: ReDoS em `picomatch <=4.0.7`, sem versão corrigida publicada na consulta. Os caminhos reportados pertencem às dependências de desenvolvimento de ESLint/Vitest. Não foi acrescentada exceção nem reduzido o nível da auditoria. O CI executa auditoria e validação funcional em jobs independentes, para testar a aplicação mantendo a auditoria reprovada como pendência de publicação. Conferir [o aviso](https://github.com/advisories/GHSA-fc5q-39xc-vjpf) e atualizar a dependência transitiva quando houver correção compatível. O build do Next também pode conter cópias empacotadas; a classificação como desenvolvimento não comprova ausência de exposição no framework. A aplicação não oferece campos de glob fornecido pelo usuário.
+
 A CSP candidata usa `base-uri 'none'` em `Content-Security-Policy-Report-Only`, junto à política aplicada com `base-uri 'self'`. O navegador permite observar as violações no console. A coleta centralizada depende de definir um destino de relatórios e revisar a retenção, porque relatórios podem incluir URLs da página. Os cabeçalhos desta entrega permitem a inspeção manual no navegador.
 
 Dependabot consulta os ecossistemas npm e GitHub Actions semanalmente. O workflow CodeQL usa JavaScript/TypeScript, modo de build `none`, análise de PRs para `main`, pushes na `main` e execução semanal. A permissão `security-events: write` fica restrita ao job de análise.

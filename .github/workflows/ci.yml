@@ -5,6 +5,20 @@ on:
 permissions:
   contents: read
 jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=moderate
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -20,7 +34,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=moderate
       - run: node scripts/scan-secrets.mjs --require-history
       - run: node scripts/check-legal.mjs
       - run: pnpm exec supabase start
