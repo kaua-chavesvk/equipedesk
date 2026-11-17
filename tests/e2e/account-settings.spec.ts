@@ -27,6 +27,11 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await page.reload();
   await expect(page.getByLabel('Display name')).toHaveValue('Marina QA');
   await expect(page.getByLabel('Text size')).toHaveValue('125');
+  await page.goto('/aceitar-termos');
+  await page.getByRole('checkbox', { name: /I have read and accept/ }).check();
+  await page.getByRole('checkbox', { name: /I confirm that I am 18/ }).check();
+  await page.getByRole('button', { name: 'Accept and continue', exact: true }).click();
+  await expect(page).toHaveURL(/\/onboarding$/);
   await page.goto('/e/aurora/chamados');
   await expect(page.getByRole('heading', { name: 'Tickets', exact: true })).toBeVisible();
   await page.goto('/e/aurora/equipe');

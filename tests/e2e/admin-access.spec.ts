@@ -22,8 +22,8 @@ test('administrador de empresa não acessa a fila global nem responde pedidos', 
   const { id } = await ownRequest.json();
 
   await page.goto('/admin/privacidade');
-  await expect(page.getByRole('heading', { name: 'Este caminho não está disponível.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Atendimento de privacidade' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: /^(Este caminho não está disponível\.|This page is unavailable\.)$/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^(Atendimento de privacidade|Privacy requests)$/ })).toHaveCount(0);
 
   const answer = await page.request.post('/api/privacidade', {
     headers: { Origin: origin },
