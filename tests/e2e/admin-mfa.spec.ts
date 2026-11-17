@@ -1,6 +1,10 @@
 import { createHmac } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 
+// Playwright also records a DOM error-context snapshot even when trace is off.
+// Clear the sensitive setup screen before fixture teardown can snapshot it.
+test.afterEach(async ({ page }) => { await page.goto('about:blank'); });
+
 // RFC 6238, test-only. Production delegates code validation to Supabase Auth.
 function totp(secret: string) {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -42,10 +46,12 @@ test('administrador precisa confirmar TOTP e uma nova sessão volta a exigir o c
   await page.getByRole('link', { name: 'Confirmar segundo fator' }).click();
   await expect(page.getByRole('heading', { name: 'Segurança da administração' })).toBeVisible();
   await page.getByRole('button', { name: 'Cadastrar autenticador' }).click();
+  await expect(page.getByRole('textbox', { name: 'Chave de configuração' })).toBeVisible();
   const secret = await page.getByRole('textbox', { name: 'Chave de configuração' }).inputValue();
   // Read the synthetic secret only in memory; traces, screenshots and video are disabled.
   await expect(page.getByRole('img', { name: 'QR code para configurar o autenticador' })).toBeVisible();
-  expect(await page.getByRole('img').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect.poll(() => page.getByRole('img', { name: 'QR code para configurar o autenticador' })
+    .evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await page.getByRole('textbox', { name: 'Código de seis dígitos' }).fill(totp(secret));
   await page.getByRole('button', { name: 'Confirmar código' }).click();
   await expect(page.getByRole('link', { name: 'Ir para a administração' })).toBeVisible();
@@ -64,7 +70,13 @@ test('administrador precisa confirmar TOTP e uma nova sessão volta a exigir o c
 
   await page.request.post('/api/auth', { headers, data: { action: 'logout' } });
   expect((await login('mfa-admin@security.example')).ok()).toBe(true);
-  await page.context().addCookies([{ name: 'desk_locale', value: 'en', url: origin }]);
+  const settings = await page.request.get('/api/conta/configuracoes');
+  expect(settings.ok()).toBe(true);
+  const { preferences } = await settings.json();
+  const locale = await page.request.patch('/api/conta/preferencias', {
+    headers, data: { patch: { locale: 'en' }, version: preferences.version },
+  });
+  expect(locale.ok()).toBe(true);
   await page.goto('/admin/privacidade');
   await page.getByRole('link', { name: 'Confirm second factor' }).click();
   await expect(page.getByRole('heading', { name: 'Administration security' })).toBeVisible();

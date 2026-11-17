@@ -6,6 +6,14 @@ import type { supabaseServer } from '@/lib/supabase/server';
 
 type Auth = Pick<Awaited<ReturnType<typeof supabaseServer>>['auth'], 'mfa' | 'getClaims'>;
 
+export function totpQrImage(svgDataUrl: string) {
+  const prefix = 'data:image/svg+xml;utf-8,';
+  if (!svgDataUrl.startsWith(prefix)) throw new HttpError(503, 'Não foi possível cadastrar o autenticador. Tente novamente.');
+  // The SDK wraps raw SVG (including newlines/#) in a data URL. Encode its payload
+  // so next/image never parses raw control characters or an SVG fragment as a URL.
+  return 'data:image/svg+xml;base64,' + Buffer.from(svgDataUrl.slice(prefix.length), 'utf8').toString('base64');
+}
+
 // This endpoint must remain reachable at AAL1 so an administrator can complete MFA.
 export async function requirePlatformAdmin() {
   const scope = await requireAccount();
@@ -35,7 +43,7 @@ export async function changeAdminMfa(auth: Auth, userId: string, input: MfaInput
     const { data, error } = await auth.mfa.enroll({ factorType: 'totp', friendlyName: 'EquipeDesk' });
     if (error) throw new HttpError(422, 'Não foi possível cadastrar o autenticador. Tente novamente.');
     // Only the explicit enrollment response contains the secret; never persist or log it.
-    return { factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+    return { factorId: data.id, qrCode: totpQrImage(data.totp.qr_code), secret: data.totp.secret };
   }
   const factor = current.factors.find(item => item.id === input.factorId);
   if (!factor) throw new HttpError(404, 'Autenticador não encontrado.');

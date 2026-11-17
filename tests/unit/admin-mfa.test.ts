@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mfaInput } from '@/features/security/mfa';
-import { adminMfaStatus, changeAdminMfa, requirePlatformAdmin } from '@/lib/server/admin-mfa';
+import { adminMfaStatus, changeAdminMfa, requirePlatformAdmin, totpQrImage } from '@/lib/server/admin-mfa';
 import { requireAccount } from '@/lib/server/account-settings';
 
 vi.mock('server-only', () => ({}));
@@ -56,7 +56,7 @@ describe('segundo fator', () => {
   it('cadastra TOTP e retorna a chave apenas na resposta de cadastro', async () => {
     const { auth, mfa } = fixture([]);
     await expect(changeAdminMfa(auth, 'admin', { action: 'enroll' })).resolves.toEqual({
-      factorId: id, qrCode: 'data:image/svg+xml;utf-8,synthetic', secret: 'synthetic-test-key',
+      factorId: id, qrCode: 'data:image/svg+xml;base64,c3ludGhldGlj', secret: 'synthetic-test-key',
     });
     expect(mfa.enroll).toHaveBeenCalledWith({ factorType: 'totp', friendlyName: 'EquipeDesk' });
   });
@@ -94,6 +94,18 @@ describe('segundo fator', () => {
       .mockResolvedValueOnce({ data: { claims: { sub: 'admin', aal: 'aal2' } }, error: null });
     expect((await changeAdminMfa(auth, 'admin', { action: 'verify', factorId: id, code: '001234' }))).toMatchObject({ verified: true });
     expect(mfa.challengeAndVerify).toHaveBeenCalledWith({ factorId: id, code: '001234' });
+  });
+});
+
+describe('imagem TOTP', () => {
+  it('preserva o SVG com fragmentos e quebras de linha em uma URL base64 válida', () => {
+    const svg = '<svg><path fill="#000" d="M0 0" /></svg>\n';
+    const result = totpQrImage('data:image/svg+xml;utf-8,' + svg);
+    expect(result).toMatch(/^data:image\/svg\+xml;base64,[A-Za-z0-9+/=]+$/);
+    expect(Buffer.from(result.split(',')[1], 'base64').toString('utf8')).toBe(svg);
+  });
+  it('recusa URL externa ou formato inesperado sem expor o conteúdo', () => {
+    expect(() => totpQrImage('https://external.example/qr')).toThrow('Não foi possível cadastrar o autenticador.');
   });
 });
 
