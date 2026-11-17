@@ -41,6 +41,7 @@ jobs:
           export SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
           node scripts/seed-demo.mjs
           node scripts/test-data-api.mjs
+          node scripts/test-avatar-storage.mjs
       - run: pnpm build
         env:
           DEMO_MODE: 'true'
@@ -53,7 +54,13 @@ jobs:
           export NEXT_PUBLIC_SUPABASE_URL="$API_URL"
           export NEXT_PUBLIC_SUPABASE_ANON_KEY="$ANON_KEY"
           export DEMO_PASSWORD="$(node -p "require('node:crypto').randomBytes(24).toString('hex')")"
+          export AVATAR_PROCESSING_SECRET="$(node -p "require('node:crypto').randomBytes(32).toString('hex')")"
+          export AVATAR_URL_SECRET="$(node -p "require('node:crypto').randomBytes(32).toString('hex')")"
+          export AVATAR_PROCESSING_KEY_ID=e2e
+          printf '::add-mask::%s\n' "$AVATAR_PROCESSING_SECRET" "$AVATAR_URL_SECRET" "$DEMO_PASSWORD"
           SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" node scripts/seed-admin-e2e.mjs
+          printf "select public.account_feature_set('settings',true); select public.account_feature_set('avatars',true); select public.avatar_processing_key_set('e2e',vault.create_secret('%s'));" "$AVATAR_PROCESSING_SECRET" |
+            docker exec -i supabase_db_equipedesk psql -U postgres -d postgres -v ON_ERROR_STOP=1
           pnpm exec playwright test --config playwright.supabase.config.ts
         env:
           SUPABASE_SERVICE_ROLE_KEY: ''

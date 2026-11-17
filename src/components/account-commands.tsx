@@ -10,7 +10,7 @@ export function AccountCommands() {
   const trigger = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (pathname.startsWith('/e/')) return;
+    if (pathname.startsWith('/e/') && !pathname.endsWith('/configuracoes')) return;
     function keyboard(event: KeyboardEvent) {
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return;
       if (!open && document.querySelector('[role="dialog"]')) return;
@@ -22,6 +22,7 @@ export function AccountCommands() {
     return () => document.removeEventListener('keydown', keyboard);
   }, [pathname, open]);
 
-  return open && <WorkspaceCommands open onOpenChange={setOpen} organizations={[]} tickets={[]}
+  const base = pathname.startsWith('/e/') ? pathname.split('/').slice(0, 3).join('/') : undefined;
+  return open && <WorkspaceCommands open onOpenChange={setOpen} base={base} organizations={[]} tickets={[]}
     restoreFocus={() => trigger.current?.focus()} />;
 }

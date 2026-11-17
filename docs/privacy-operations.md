@@ -1,5 +1,28 @@
 # Privacidade e operação — 12/11/2026
 
+## Perfis, preferências e fotos — implementação de 16/11/2026 na branch
+
+As migrações `202611160001_account_settings.sql` e `202611160002_private_avatars.sql` acrescentam perfis, preferências próprias e estrutura privada de fotos na branch `feature/configuracoes-conta`. As flags `settings`, `avatars` e `email_change` começam desligadas. A branch inclui a tela de configurações, processamento em memória e URLs de foto vinculadas ao usuário e à versão. Os testes unitários verificam a saída WebP de um JPEG com EXIF e campos GPS.
+
+Nome é usado somente para exibição e não altera identidade, papel ou evidências legais. Preferências de tema/idioma/fuso/uso são privadas do titular, sem exceção de administrador geral. Nome/foto do perfil podem ser lidos pelo próprio usuário e por colegas com membership real compartilhada. Não inferir esse vínculo do acesso global de administração.
+
+Foto é opcional e se destina à identificação entre colegas, sem uso biométrico. O bucket `profile-avatars` é privado e aceita apenas o WebP final; originais não devem ser enviados ao Storage. Antes da primeira coleta real, concluir a normalização no servidor, testes de metadados, URL curta, acessibilidade e revisão da política pública/operadores. O desenho detalhado está em [configurações](configuracoes.md). Os documentos jurídicos versionados ainda não foram alterados por esta implementação.
+
+### Remoção, exclusão de conta e verificação
+
+- O titular pode retirar a foto pelo comando `avatar_remove` mesmo com a flag de fotos desligada. O comando desvincula o perfil e registra `private.avatar_cleanup_jobs`; não afirma que os bytes já foram apagados. O próprio usuário continua tendo acesso à remoção sem precisar de membership.
+- Excluir objetos sempre pela Storage API, verificando a resposta, e depois confirmar ausência/limpeza. Não executar DELETE SQL em `storage.objects` como substituto da exclusão física. A função `avatar_cleanup_complete` recusa confirmação enquanto a metadata do objeto ainda existir; a confirmação administrativa exige também evidência da chamada bem-sucedida à Storage API.
+- Na troca, o perfil só publica o candidato após finalização válida. A imagem anterior entra na fila de limpeza. A rotina de claim cancela candidatos vencidos após uma hora de margem. Execute `node scripts/run-avatar-cleanup.mjs` em processo administrativo com URL, credencial e `AVATAR_CLEANUP_TARGET` igual à origem do projeto. Configure e valide o agendamento em homologação antes de habilitar fotos.
+- O processo administrativo usa `avatar_cleanup_claim`/`avatar_cleanup_complete` fora do servidor web, com lease de cinco minutos e até oito tentativas. Trabalho esgotado fica failed para análise, nunca concluído por presunção. Jobs concluídos e intenções retiradas/canceladas sem objeto são expurgados após 30 dias pela rotina de claim. Nenhum caminho, URL assinada ou imagem deve ser registrado em logs públicos.
+- Para atendimento efetivo de exclusão de conta: interromper novas gravações pertinentes, inventariar/remover objetos do titular e verificar a Storage API antes de remover a identidade; o provedor pode recusar exclusão de usuário que ainda possua objetos. Excluir a identidade faz cascade de perfil, preferências e visualizações. O trigger administrativo registra intenções remanescentes para limpeza, mas não substitui a remoção dos arquivos.
+- Não marcar o pedido de direitos como executado apenas por desvincular uma foto ou apagar uma linha. Verificar pendências da fila, objetos/variantes e retenções justificadas, e registrar conclusão ou impedimento de forma minimizada. Não guardar refresh token do usuário para um futuro worker.
+
+### Chaves e desligamento
+
+O servidor normaliza o arquivo e emite os atestados de upload e finalização com a chave configurada em `AVATAR_PROCESSING_SECRET`. A operação usa `avatar_processing_key_set` para associar `AVATAR_PROCESSING_KEY_ID` a um segredo do Vault e `avatar_processing_key_disable` para revogar o ID. Use chaves aleatórias específicas de cada ambiente e configure `AVATAR_URL_SECRET` separadamente para as URLs de 60 segundos. Emita e armazene os segredos pelos controles do provedor.
+
+`account_feature_set` é exclusivo da operação administrativa e permite desligar recursos sem deploy. Administração de workspace/plataforma com sessão normal não concede esse poder. Quando a operação de Storage não é reconhecida, as políticas negam acesso; confirmar compatibilidade do serviço hospedado antes de habilitar fotos. O desligamento impede novas publicações/leituras, preservando a remoção própria e a limpeza administrativa.
+
 ## Identificação pública autorizada
 
 - Nome informado: **mikaelson desk**.

@@ -1,0 +1,30 @@
+import { expect, test } from '@playwright/test';
+
+test('mantém o idioma entre acesso, demonstração, chamados e documentos', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto('/login');
+  await page.getByLabel('Idioma', { exact: true }).selectOption('en');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.getByRole('heading', { name: 'Sign in to your account.' })).toBeVisible();
+  await page.getByRole('link', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Terms and privacy choices' })).toBeVisible();
+  await page.goto('/privacidade');
+  await expect(page.getByRole('heading', { name: 'Privacy Policy', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What we collect and why' })).toBeVisible();
+  await page.goto('/login');
+  await page.getByRole('button', { name: 'Explore the demo' }).click();
+  await expect(page.getByRole('heading', { name: /Hello,/ })).toBeVisible();
+  await page.goto('/e/aurora/chamados');
+  await expect(page.getByRole('heading', { name: 'Tickets', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Kanban', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'In progress', exact: true })).toBeVisible();
+  await page.goto('/e/aurora/chamados/novo');
+  await expect(page.getByLabel('Ticket title')).toBeVisible();
+  await page.goto('/e/aurora/equipe');
+  await expect(page.getByRole('heading', { name: 'Team', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await page.getByLabel('Language', { exact: true }).selectOption('pt-BR');
+  await expect(page.getByRole('heading', { name: 'Equipe', exact: true })).toBeVisible();
+});

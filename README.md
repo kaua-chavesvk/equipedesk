@@ -1,8 +1,8 @@
 # EquipeDesk
 
-SaaS de atendimento interno em português do Brasil. Next.js App Router, React, TypeScript estrito, Tailwind CSS, Supabase Auth e PostgreSQL com RLS. A aplicação oferece uma demonstração explorável sem credenciais e uma integração com Supabase para persistência e autenticação real.
+SaaS de atendimento interno em português do Brasil e inglês. Next.js App Router, React, TypeScript estrito, Tailwind CSS, Supabase Auth e PostgreSQL com RLS. A aplicação oferece uma demonstração explorável sem credenciais e uma integração com Supabase para persistência e autenticação real.
 
-Documentação atualizada em **13/11/2026**. Os resultados abaixo registram as verificações realizadas até essa data; não representam monitoramento contínuo do serviço.
+Documentação atualizada em **17/11/2026**. As evidências de cada entrega estão em [docs/progress.md](docs/progress.md).
 
 ## Site publicado e estado atual
 
@@ -20,6 +20,9 @@ O endereço principal direciona visitantes sem sessão para o login. O login adm
 | Área | Entrega |
 |---|---|
 | Interface | Layout para desktop e celular, espaços de trabalho por empresa, fila, indicadores, busca e filtros |
+| Idiomas | Português do Brasil e inglês nas telas de acesso, workspace, chamados, equipe, configurações e privacidade. A preferência da conta vale entre dispositivos. Visitantes podem escolher o idioma no rodapé |
+| Conta e aparência | Nome de exibição, tema, tamanho do texto, densidade, contraste, redução de movimento, fuso e visualização inicial |
+| Foto de perfil | Arraste com mouse ou toque, ajuste de zoom, setas do teclado e centralização. Processamento para WebP de 256 × 256 e armazenamento privado com acesso por empresa compartilhada |
 | Chamados | Abertura, detalhe, comentários, atribuição, resolução e reabertura com motivo; controle de versão para concorrência |
 | Empresas e equipe | Múltiplas empresas, associações por usuário, papéis de solicitante, atendente e administrador, convites e troca de empresa |
 | Administrador geral | Acesso administrativo a todas as empresas, inclusive futuras, por registro protegido no banco e script de provisionamento |

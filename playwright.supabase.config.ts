@@ -9,8 +9,9 @@ if (!supabase || !['localhost', '127.0.0.1'].includes(new URL(supabase).hostname
 const origin = 'http://127.0.0.1:3107';
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: '**/admin-access.spec.ts',
+  testMatch: ['**/admin-access.spec.ts', '**/account-settings.spec.ts'],
   workers: 1,
+  timeout: 60_000,
   use: { ...devices['Desktop Chrome'], baseURL: origin, trace: 'off', screenshot: 'off', video: 'off' },
   webServer: {
     command: 'pnpm exec next dev --hostname 127.0.0.1 --port 3107',

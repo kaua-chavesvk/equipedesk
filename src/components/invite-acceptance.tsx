@@ -1,4 +1,6 @@
 'use client';
+import { useTranslations } from '@/features/i18n/context';
+
 import { useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -7,6 +9,7 @@ import { toast } from 'sonner';
 const subscribe = () => () => {};
 
 export function InviteAcceptance({ token, company, role, loginRequired, unavailable }: { token: string; company?: string; role?: string; loginRequired?: boolean; unavailable?: string }) {
+  const t = useTranslations();
   const router = useRouter();
   const ready = useSyncExternalStore(subscribe, () => true, () => false);
   const [message, setMessage] = useState('');
@@ -23,30 +26,30 @@ export function InviteAcceptance({ token, company, role, loginRequired, unavaila
       });
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(typeof result.error === 'string' ? result.error : 'Não foi possível aceitar o convite.');
+        throw new Error(typeof result.error === 'string' ? result.error : t("Não foi possível aceitar o convite."));
       }
       if (typeof result.slug !== 'string' || !/^[a-z0-9][a-z0-9-]{1,59}$/.test(result.slug)) {
-        throw new Error('Não foi possível abrir a empresa. Acesse seus espaços de trabalho.');
+        throw new Error(t("Não foi possível abrir a empresa. Acesse seus espaços de trabalho."));
       }
-      toast.success('Convite aceito.');
+      toast.success(t("Convite aceito."));
       router.replace(`/e/${result.slug}`);
       router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Tente novamente.');
+      setMessage(error instanceof Error ? t(error.message) : t("Tente novamente."));
     } finally {
       setBusy(false);
     }
   }
 
-  const roles: Record<string, string> = { admin: "Administrador", agent: "Atendente", requester: "Solicitante" };
+  const roles: Record<string, string> = { admin: t("Administrador"), agent: t("Atendente"), requester: t("Solicitante") };
   return <main className="auth-page"><section className="auth-card">
-    <span className="eyebrow">VOCÊ FOI CONVIDADO</span>
-    <h1>Convite para uma empresa</h1>
-    <p className="muted">Entre com o mesmo e-mail verificado que recebeu o convite para fazer parte desta empresa.</p>
+    <span className="eyebrow">{t("VOCÊ FOI CONVIDADO")}</span>
+    <h1>{t("Convite para uma empresa")}</h1>
+    <p className="muted">{t("Entre com o mesmo e-mail verificado que recebeu o convite para fazer parte desta empresa.")}</p>
     {company && role && <p className="muted"><strong>{company}</strong> · {roles[role]}</p>}
-    {unavailable && <p className="form-error" role="alert">{unavailable}</p>}
-    {!loginRequired && !unavailable && <button className="button primary" disabled={!ready || busy} onClick={accept}>{busy ? 'Aceitando convite…' : 'Aceitar convite'}</button>}
-    {message && <p className="form-error" role="alert" tabIndex={-1} ref={element => element?.focus()}>{message}</p>}
-    <Link className="demo-link" href={`/login?next=${encodeURIComponent(`/convite/${token}`)}`}>Entrar na minha conta →</Link>
+    {unavailable && <p className="form-error" role="alert">{t(unavailable)}</p>}
+    {!loginRequired && !unavailable && <button className="button primary" disabled={!ready || busy} onClick={accept}>{busy ? t("Aceitando convite…") : t("Aceitar convite")}</button>}
+    {message && <p className="form-error" role="alert" tabIndex={-1} ref={element => element?.focus()}>{t(message)}</p>}
+    <Link className="demo-link" href={`/login?next=${encodeURIComponent(`/convite/${token}`)}`}>{t("Entrar na minha conta →")}</Link>
   </section></main>;
 }

@@ -17,7 +17,12 @@ export async function rateLimit(request: Request) {
   const limit = prod ? (auth ? 10 : 120) : 1000;
   // Forwarded IPs are only accepted when a trusted ingress overwrites them.
   const identity = process.env.TRUST_PROXY === 'true' ? request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'shared' : 'shared';
-  const key = `equipedesk:${auth?'auth':'api'}:${createHash('sha256').update(identity).digest('hex')}`;
+  return rateLimitBucket(auth ? 'auth' : 'api', identity, limit);
+}
+
+export async function rateLimitBucket(namespace: 'auth' | 'api' | 'avatar-upload', identity: string, limit: number) {
+  const prod = process.env.NODE_ENV === 'production';
+  const key = `equipedesk:${namespace}:${createHash('sha256').update(identity).digest('hex')}`;
   const url = process.env.RATE_LIMIT_REDIS_URL, token = process.env.RATE_LIMIT_REDIS_TOKEN;
   if (!url || !token) {
     if (prod) throw new Error('Rate limiter unavailable');
