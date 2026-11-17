@@ -9,7 +9,9 @@ const container = 'supabase_db_equipedesk';
 const suffix = randomUUID().replaceAll('-', '');
 const database = 'equipedesk_restore_' + suffix;
 const archive = '/tmp/equipedesk-restore-' + suffix + '.dump';
+const hbaBackup = '/tmp/equipedesk-hba-' + suffix;
 let created = false;
+let socketAuthEnabled = false;
 
 function docker(args, input) {
   return execFileSync('docker', args, {
@@ -30,6 +32,17 @@ const fingerprint = tables.map(table =>
 ).join('\n');
 
 try {
+  // The built-in roles own objects across several schemas. Restore using the
+  // local system role and limit its temporary login to the container socket.
+  const hba = docker(['exec', container, 'psql', '-X', '-U', 'postgres', '-d', 'postgres',
+    '-Atc', 'show hba_file']).trim();
+  assert.match(hba, /^\/[\w/.-]+$/);
+  docker(['exec', '-u', 'postgres', container, 'cp', '-p', '--', hba, hbaBackup]);
+  socketAuthEnabled = true;
+  try {
+    docker(['exec', '-u', 'postgres', container, 'sh', '-ec',
+      'printf "%s\\n" "local all supabase_admin trust" | cat - "$2" > "$1"; pg_ctl -D "$PGDATA" reload',
+      'restore-test', hba, hbaBackup]);
   const source = sql('postgres', fingerprint);
   assert.equal(sql('postgres', 'select count(*) >= 4 from auth.users;'), 't', 'Prepare o seed local.');
   docker(['exec', container, 'pg_dump', '-U', 'supabase_admin', '-d', 'postgres', '-Fc', '-f', archive]);
@@ -73,8 +86,16 @@ try {
     end $$;
     rollback;
   `);
-  console.log('Backup restaurado em banco descartável. Dados, RLS e bloqueio de escrita direta conferidos.');
+    console.log('Backup restaurado em banco descartável. Dados, RLS e bloqueio de escrita direta conferidos.');
+  } finally {
+    try {
+      if (created) docker(['exec', container, 'dropdb', '-U', 'supabase_admin', '--force', database]);
+    } finally {
+      docker(['exec', '-u', 'postgres', container, 'sh', '-ec',
+        'cp -p -- "$2" "$1"; pg_ctl -D "$PGDATA" reload; rm -f -- "$2"',
+        'restore-test', hba, hbaBackup]);
+    }
+  }
 } finally {
-  if (created) docker(['exec', container, 'dropdb', '-U', 'supabase_admin', '--force', database]);
-  docker(['exec', container, 'rm', '-f', '--', archive]);
+  if (socketAuthEnabled) docker(['exec', container, 'rm', '-f', '--', archive]);
 }
