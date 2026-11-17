@@ -10,16 +10,18 @@ export const queueInput = z.object({
   q: z.string().trim().max(200).default(''),
   status: z.enum(['all','open','in_progress','resolved']).default('all'),
   priority: z.enum(['all','low','medium','high','urgent']).default('all'),
+  assignee: z.enum(['all','me']).default('all'),
   page: z.coerce.number().int().min(1).max(1000000).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(6),
 });
 export type QueueInput = z.infer<typeof queueInput>;
 
 export async function queryTickets(workspace: Workspace, input: QueueInput) {
-  const { q, status, priority, page, pageSize } = input;
+  const { q, status, priority, assignee, page, pageSize } = input;
   if (demoEnabled()) {
     const tickets = workspace.tickets.filter(t =>
       (status === 'all' || t.status === status) && (priority === 'all' || t.priority === priority) &&
+      (assignee === 'all' || t.assignee_id === workspace.user.id) &&
       `${t.title} ${t.description}`.toLowerCase().includes(q.toLowerCase()))
       .sort((a,b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id));
     return { data: tickets.slice((page-1)*pageSize,page*pageSize), total: tickets.length, page, pageSize };
@@ -30,6 +32,7 @@ export async function queryTickets(workspace: Workspace, input: QueueInput) {
     let query = client.from('tickets').select('*', { count: 'exact' }).eq('organization_id',workspace.organization.id);
     if (status !== 'all') query = query.eq('status',status);
     if (priority !== 'all') query = query.eq('priority',priority);
+    if (assignee === 'me') query = query.eq('assignee_id',workspace.user.id);
     // Quote the complete pattern for PostgREST and escape LIKE wildcards.
     if (q) {
       const pattern = JSON.stringify(`%${q.replace(/[\\%_]/g,'\\$&')}%`);
@@ -53,7 +56,7 @@ export async function queryTickets(workspace: Workspace, input: QueueInput) {
       global: { fetch: (input, init) => boundedSupabaseFetch(input, { ...init, cache: 'no-store' }) },
     });
   return cachedTickets(organizationId, workspace.user.id, role,
-    JSON.stringify([status, priority, page, pageSize]), () => load(client));
+    JSON.stringify([status, priority, assignee, page, pageSize]), () => load(client));
 }
 
 export async function ticketCounts(workspace: Workspace) {

@@ -27,6 +27,20 @@ it('mantém pontuação e curingas da busca como texto literal',async()=>{
  const pattern=JSON.stringify(`%${q.replace(/[\\%_]/g,'\\$&')}%`);
  expect(calls.or).toEqual([[`title.ilike.${pattern},description.ilike.${pattern}`]]);
 });
+it('filtra atribuídos a mim pelo ID da sessão autorizada, sem aceitar ID arbitrário', async () => {
+ const own = { ...workspace, user: { id: 'viewer' } } as Workspace;
+ await queryTickets(own, queueInput.parse({ assignee: 'me' }));
+ expect(calls.eq).toEqual([['organization_id','aurora'],['assignee_id','viewer']]);
+ expect(queueInput.safeParse({ assignee: 'other-id' }).success).toBe(false);
+});
+it('filtra atribuídos a mim também na demonstração', async () => {
+ mocks.demo.mockReturnValue(true);
+ const own = { ...workspace, user: { id: 'viewer' }, tickets: [
+  { id: 'a', assignee_id: 'viewer', title: 'A', description: '', status: 'open', priority: 'high', created_at: '2026-11-17' },
+  { id: 'b', assignee_id: 'other', title: 'B', description: '', status: 'open', priority: 'high', created_at: '2026-11-17' },
+ ] } as unknown as Workspace;
+ expect((await queryTickets(own, queueInput.parse({ assignee: 'me' }))).data.map(item => item.id)).toEqual(['a']);
+});
 it('busca o detalhe diretamente por empresa e ID sem depender da lista',async()=>{
  const id='00000000-0000-4000-8000-000000000001';await ticketById(workspace,id);
  expect(calls.eq).toEqual([['organization_id','aurora'],['id',id]]);expect(calls.range).toBeUndefined();

@@ -24,6 +24,7 @@ export type Database = {
       profiles: Table<AccountProfile>;
       user_preferences: Table<UserPreferences>;
       user_workspace_preferences: Table<UserWorkspacePreferences>;
+      user_ticket_filters: Table<{ user_id: string; organization_id: string; filters: Json; version: number; updated_at: string }>;
       platform_admins: Table<{user_id:string;created_at:string}>;
       legal_acceptances: Table<{id:string;user_id:string|null;subject_hash:string;kind:string;terms_version:string|null;privacy_version:string|null;adult_confirmed:boolean|null;source:string;recorded_at:string;delete_after:string|null}>;
       privacy_preferences: Table<{user_id:string;marketing:boolean;unsubscribe_hash:string|null;updated_at:string}>;
@@ -37,6 +38,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      ticket_filters_update: { Args: { p_slug: string; p_filters: Json; p_version: number }; Returns: Json };
       renew_invitation: { Args: { p_slug: string; p_id: string }; Returns: Json };
       account_profile_update: { Args: { p_name: string; p_version: number }; Returns: Json };
       account_preferences_update: { Args: { p_patch: Json; p_version: number }; Returns: Json };

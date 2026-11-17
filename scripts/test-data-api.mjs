@@ -135,4 +135,18 @@ assert.equal(reopened.status, 'open');
 assert.equal(reopened.version, 4);
 assert.equal(reopened.assignee_id, null);
 passed('O solicitante reabre o próprio chamado resolvido com motivo');
+const shortcut = { id: crypto.randomUUID(), name: 'REST concurrency', q: '', status: 'all', priority: 'urgent', assignee: 'me', view: 'kanban' };
+const previousFilters = success(await request('/rest/v1/user_ticket_filters?select=version', lucas.token), 'Versão anterior dos filtros');
+const filterVersion = previousFilters[0]?.version ?? 0;
+const filterWrites = await Promise.all([shortcut.name, 'Other device'].map(name => request('/rest/v1/rpc/ticket_filters_update', lucas.token, {
+  method: 'POST', body: { p_slug: 'aurora', p_filters: [{ ...shortcut, name }], p_version: filterVersion },
+})));
+assert.equal(filterWrites.filter(result => result.ok).length, 1);
+assert.match(filterWrites.find(result => !result.ok).data.message, /^409:/);
+const persistedFilters = success(await request('/rest/v1/user_ticket_filters?select=filters,version', lucas.token), 'Filtros pessoais');
+assert.equal(persistedFilters.length, 1);
+assert.equal(persistedFilters[0].version, filterVersion + 1);
+assert.deepEqual(persistedFilters[0].filters, filterWrites.find(result => result.ok).data.filters);
+assert.deepEqual(success(await request('/rest/v1/user_ticket_filters?select=user_id', rafa.token), 'Filtros do colega'), []);
+passed('Filtros pessoais: duas gravações simultâneas têm um vencedor e não vazam para colega');
 console.log(`${checks} verificações conectadas aprovadas. Chamado de evidência: ${ticket.id}`);

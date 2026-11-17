@@ -27,7 +27,7 @@ function sql(target, statement) {
 }
 
 const tables = ['auth.users', 'public.organizations', 'public.memberships', 'public.tickets',
-  'public.comments', 'public.ticket_events', 'public.profiles', 'public.user_preferences'];
+  'public.comments', 'public.ticket_events', 'public.profiles', 'public.user_preferences', 'public.user_ticket_filters'];
 const fingerprint = tables.map(table =>
   `select '${table}', count(*), md5(coalesce(string_agg(row_to_json(item)::text, E'\n' order by row_to_json(item)::text), '')) from ${table} item;`,
 ).join('\n');

@@ -230,6 +230,16 @@ O roteiro detalhado e os critérios de aceite estão em [tarefas](docs/tasks.md)
 
 ## Interação e conforto no uso diário
 
+### Filtros pessoais da fila
+
+A fila permite filtrar **Atribuídos a mim** e usar o atalho **Meus urgentes**. Cada conta pode salvar até dez filtros por empresa com busca, estado, prioridade, responsável (todos ou a própria pessoa) e visualização Lista/Kanban. Aplicar um atalho volta à primeira página. O atalho de urgentes inclui todos os estados; refine o estado antes de salvar se quiser somente os chamados em andamento.
+
+Os atalhos são persistidos no Supabase e ficam disponíveis em outros dispositivos da mesma conta. Colegas não leem filtros pessoais. A demonstração oferece o atalho rápido e informa que a persistência depende de uma conta conectada. Nomes e critérios de busca podem conter informações de trabalho: não são gravados em logs da aplicação, e o registro é removido junto da conta ou empresa.
+
+A migração `202611170002_saved_ticket_filters.sql` cria tabela, política de leitura própria e RPC transacional sem modificar funções ou RLS anteriores. Escrita direta é revogada; o comando valida participação, estrutura, duplicação, limite e versão. Duas sessões que editam a mesma versão não sobrescrevem uma à outra. A interface solicita recarregamento após conflito ou resultado de gravação incerto. Não existe gravação automática sobre a versão mais recente.
+
+Aplicar a migração no ambiente de destino antes de publicar essa interface. Sem a tabela, a área informa falha de carregamento e permite nova tentativa; os filtros comuns da fila continuam disponíveis. Não há nova variável de ambiente ou dependência. O cache de chamados inclui o novo critério de responsável na chave.
+
 A interface oferece visualizações Lista e Kanban, tema claro/escuro/sistema no rodapé e navegação inferior em telas pequenas. O Kanban exibe os chamados da página atual e respeita os filtros e a paginação da fila. Arraste no computador ou use os botões de ação no teclado e no toque; resolução e reabertura pedem confirmação, e a reabertura exige motivo.
 
 As transições de chamados atualizam a interface imediatamente. Uma recusa do servidor restaura o estado anterior, informa o erro por toast e atualiza a fila. A API continua validando permissão, estado e versão do chamado. O comportamento foi coberto por teste de resposta concorrente 409; a demonstração não substitui testes de concorrência no PostgreSQL.

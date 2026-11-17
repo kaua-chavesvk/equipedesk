@@ -36,8 +36,8 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Exibir falha de carregamento da conversa e permitir nova tentativa.
 - [ ] Revisar os demais limites entre SQL e HTTP, incluindo título e slug.
 - [x] Implementar filtros, contagens e paginação no banco, com detalhe consultado por ID.
-- [ ] Adicionar perfis para identificar membros, autores e responsáveis.
-- [ ] Unificar a linha do tempo com eventos persistidos e completar a gestão de convites pendentes.
+- [x] Adicionar perfis para identificar membros, autores e responsáveis.
+- [x] Unificar a linha do tempo com eventos persistidos e completar a gestão de convites pendentes.
 - [ ] Validar as jornadas com Supabase real e credenciais de usuário.
 
 ## Correções de 13/11/2026
@@ -49,5 +49,17 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Retirar o aviso de escolha de cookies opcionais inativos e neutralizar o título do login.
 - [x] Unificar comentários e eventos em ordem cronológica.
 - [ ] Executar a suíte SQL, testes com sessões reais e validar a migração de convite em staging.
-- [ ] Implementar listagem, reemissão e cancelamento de convites pendentes.
+- [x] Implementar listagem, reemissão e cancelamento de convites pendentes.
 - [ ] Validar entrega de e-mails, backups, retenção e alertas externos.
+
+## Fase 3 — fila e atalhos pessoais
+
+- [x] Conferir estados vazios: a fila já permite criar chamado e limpar filtros; manter esse comportamento.
+- [x] Adicionar responsável “Atribuídos a mim” à consulta no banco e na demonstração, preservando RLS.
+- [x] Persistir até dez filtros pessoais por empresa, com controle de versão, Lista/Kanban e suporte pt-BR/en.
+- [x] Cobrir contratos e API com Vitest; acrescentar testes SQL, concorrência pela API de dados e cenário de navegador entre sessões.
+- [ ] Registrar aprovação do novo cenário conectado no CI e aplicar a migração em homologação antes da publicação.
+- [ ] Indicadores de SLA: dependem dos prazos e regras por prioridade, ainda não definidos.
+- [ ] Ações em lote e central de notificações: próximas entregas independentes.
+
+SMTP e alertas externos continuam dependentes de configuração dos provedores. O ensaio de restauração sintético local no CI já foi executado; restauração de Storage e recuperação de dados reais continuam pendentes.

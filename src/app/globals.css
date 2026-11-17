@@ -474,6 +474,16 @@ html.dark[data-contrast="high"],.settings-preview.dark[data-contrast="high"] {
 }
 .settings-page{width:min(100%,1100px);margin-inline:auto;padding:32px clamp(18px,4vw,48px) 72px}
 .settings-page h1{margin:14px 0 24px}
+.saved-filters{padding:18px 22px;border-bottom:1px solid var(--line)}
+.saved-filters h3{font-size:1rem;margin:0 0 6px}
+.saved-filters p{margin-block:8px;line-height:1.5}
+.saved-filter-shortcuts,.saved-filter-form,.saved-filter-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.saved-filter-form{margin-top:12px;align-items:flex-end}
+.saved-filter-form label{flex:1;min-width:min(100%,180px);max-width:320px}
+.saved-filter-form input{width:100%}
+.saved-filter-item{gap:4px}
+.saved-filter-remove{min-width:44px;min-height:44px;border:1px solid var(--control-border);background:var(--surface);color:var(--ink);font-size:1.3rem;cursor:pointer}
+.saved-filter-shortcuts .button{max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
 .mfa-panel{max-width:620px}
 .mfa-panel p{margin-block:16px;line-height:1.6}
 .mfa-fields{border:0;padding:0;min-inline-size:0}
