@@ -15,7 +15,7 @@ Resultado local desta revisão de apresentação e organização do código. Amb
 
 A falha de arrastar ocorre antes de uma requisição de transição ser observada. Não foi atribuída à API sem evidência; permanece aberta para investigação da interação nativa no navegador. Os testes de criação, comentário, resolução, reabertura, disputa de versão e isolamento pela API demo passaram. Esta execução não representa nova validação SQL ou Supabase remoto.
 
-A formatação final (`pnpm format:check`) foi aprovada. A auditoria de dependências anterior mantém um alerta alto de picomatch sem versão corrigida informada. Avisos de Vite/CommonJS e depreciação do Node foram observados.
+O build final (`pnpm build`) concluiu compilação, TypeScript, geração de páginas e coleta de traces. A formatação final (`pnpm format:check`) foi aprovada. A auditoria de dependências anterior mantém um alerta alto de picomatch sem versão corrigida informada. Avisos de Vite/CommonJS e depreciação do Node foram observados.
 
 Contagens em relatórios antigos pertencem às respectivas execuções. Este documento centraliza o resultado vigente; não alterar evidências históricas para simular que testes novos existiam antes.
 
