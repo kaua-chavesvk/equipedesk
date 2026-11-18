@@ -32,3 +32,17 @@ Não desligar a exigência global como procedimento normal de recuperação. Nã
 - A chave de cadastro fica em memória no cliente durante a configuração. Não é gravada no banco da aplicação, localStorage ou logs. O Supabase administra o segredo TOTP.
 - A suíte conectada usa Supabase local descartável e conta sintética, com capturas, vídeo e traces desativados para não registrar a chave. Não comprova operação de recuperação ou cadastro em produção.
 - Não há mudança de schema nesta entrega; testes SQL existentes continuam no CI. Vitest cobre contratos, autorização, erros do provedor, propriedade do fator, limite por conta e recusa quando o Redis falha.
+
+## Ensaio hospedado de recuperação — 18/11/2026
+
+Executado no projeto de homologação, com duas contas sintéticas descartáveis e clientes sem persistência de sessão. Nenhum fator de conta real foi alterado. As duas contas foram removidas ao final, inclusive após a primeira assertiva falhar.
+
+- Primeiro cenário: cadastrar e confirmar TOTP, remover o fator pela API administrativa e tentar renovar a sessão anterior. A renovação ainda funcionou: remover o fator isoladamente não foi suficiente no ambiente observado.
+- Segundo cenário: revogar explicitamente todas as sessões (`auth.admin.signOut(accessToken, 'global')`) antes de remover o fator. A renovação com o refresh token antigo foi recusada; `getUser` com o JWT anterior também foi recusado neste ensaio.
+- O novo login retornou AAL1, sem o fator perdido. Um novo fator TOTP foi cadastrado e confirmado; a sessão alcançou AAL2.
+
+O segundo cenário passou, mas usou o access token da própria conta sintética, disponível somente em memória. Isso não demonstra recuperação de uma conta real cujo token não esteja disponível ao operador. Antes da ativação obrigatória, validar no painel administrativo um procedimento de revogação por usuário que não dependa de pedir tokens ao titular. Não solicitar tokens de sessão, QR codes ou segredos TOTP ao usuário.
+
+JWTs já emitidos podem continuar válidos até expirar em verificações locais ou serviços que não consultam a sessão. O resultado de `getUser` neste ensaio não prova revogação universal de acesso direto ao banco. Referência: https://supabase.com/docs/guides/auth/signout.
+
+A exigência global permanece desativada enquanto essa etapa operacional não estiver validada. Não houve alteração de RLS, migração, dependência ou configuração de produção.
