@@ -79,3 +79,23 @@ commit;
 Esse comando altera dados de sessão administrados pelo provedor e deve permanecer uma operação excepcional, executada por operador autorizado. Não altera funções, grants ou RLS. A validade criptográfica de JWTs anteriores permanece até expiração; não extrapolar o resultado de `getUser` para acessos diretos ao banco. Revalidar o procedimento após mudanças relevantes do Supabase Auth.
 
 Status: recuperação técnica ensaiada com contas sintéticas; fator da conta real preservado. A ativação da flag e os testes HTTP com AAL1/AAL2 ainda são uma etapa separada. O titular deve manter acesso administrativo ao projeto Supabase para executar a recuperação quando necessário.
+
+## Exigência ativada na homologação — 18/11/2026
+
+- Conferência anterior: um administrador real em `platform_admins`, com TOTP verificado.
+- Preview publicado: `dpl_ByhfDzE5Uo3yr6dfwCf85NPrJPyD`, código de aplicação do commit `58aabe1`, com `ENFORCE_PLATFORM_ADMIN_AAL2=true` no build e runtime.
+- Endereço fixo atualizado após aprovação dos testes: https://equipedesk-configuracoes-preview.vercel.app.
+- A variável foi persistida somente no ambiente Preview da Vercel. O projeto não tem repositório Git conectado na Vercel; por isso não foi possível restringir por branch. Produção e Development não foram alterados. Novos deploys de Preview herdam a exigência salvo override explícito.
+
+Ensaio HTTP autenticado com conta sintética no deployment publicado:
+
+1. AAL1: página administrativa apresenta a orientação de segundo fator, sem renderizar a fila.
+2. AAL1: responder ao pedido sintético recebe HTTP 403.
+3. A página de segurança e o cadastro/validação TOTP continuam acessíveis; confirmação retorna AAL2.
+4. AAL2: página administrativa renderiza a fila.
+5. AAL2: resposta administrativa recebe HTTP 200 e o estado `answered` é confirmado no banco.
+6. Pedido, papel administrativo e conta sintéticos foram removidos.
+
+O primeiro ensaio usou como Origin a URL exclusiva do deployment e recebeu 403 no login: a proteção de origem aceita o endereço fixo configurado. O ensaio foi corrigido para usar a origem autorizada, sem alterar essa proteção. Todos os registros sintéticos dessa tentativa também foram removidos. Depois da troca do alias, `/login` respondeu HTTP 200 no endereço fixo via CLI autorizado; a proteção de deployment permanece ativa.
+
+Não houve alteração no código de aplicação, SQL/RLS ou conta real nesta ativação. Não foi um novo teste visual de navegador; a jornada interativa continua coberta pela suíte E2E já registrada. A auditoria executada novamente manteve um alerta alto de picomatch, sem versão corrigida informada. Produção não foi publicada nesta etapa.
