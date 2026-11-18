@@ -59,8 +59,16 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Persistir até dez filtros pessoais por empresa, com controle de versão, Lista/Kanban e suporte pt-BR/en.
 - [x] Cobrir contratos e API com Vitest; acrescentar testes SQL, concorrência pela API de dados e cenário de navegador entre sessões.
 - [x] Registrar aprovação do novo cenário conectado no CI: execução 44159116041, commit 4f016b8; quatro testes conectados aprovados, incluindo filtros.
-- [ ] Aplicar a migração em homologação e validar antes da publicação.
+- [x] Aplicar as duas migrações recentes em homologação e validar SQL remoto e jornada HTTP autenticada. Evidências em `homologacao-seguranca-2026-11-18.md`; publicação de produção continua separada.
 - [ ] Indicadores de SLA: dependem dos prazos e regras por prioridade, ainda não definidos.
 - [ ] Ações em lote e central de notificações: próximas entregas independentes.
 
 SMTP e alertas externos continuam dependentes de configuração dos provedores. O ensaio de restauração sintético local no CI já foi executado; restauração de Storage e recuperação de dados reais continuam pendentes.
+
+## Prioridade operacional de 18/11
+
+- [x] Publicar o pacote validado no Preview e aplicar as duas migrações somente no projeto de homologação.
+- [x] Executar 22 assertivas SQL remotas com rollback e sete verificações HTTP autenticadas; remover fixtures e contas sintéticas.
+- [ ] Titular concluir o Claim do Redis temporário de homologação antes da expiração em 19/11/2026; link privado entregue na conversa.
+- [ ] Preparar administradores reais e validar recuperação antes de exigir AAL2.
+- [ ] Resolver ou revisar formalmente o alerta picomatch com evidência de mitigação/correção; auditoria segue ativa.

@@ -232,6 +232,8 @@ O roteiro detalhado e os critérios de aceite estão em [tarefas](docs/tasks.md)
 
 ### Filtros pessoais da fila
 
+Homologação hospedada em 18/11: [Preview atualizado](https://equipedesk-configuracoes-preview.vercel.app) com o commit `58aabe1`, duas migrações aplicadas, 22 assertivas SQL remotas e sete verificações HTTP autenticadas aprovadas. Inclui filtros, convites e TOTP com conta sintética, removida ao final. A proteção de acesso da Vercel permanece ativa. Produção e exigência de AAL2 para administradores reais não foram ativadas nesta operação. Veja [o relatório e os limites](docs/homologacao-seguranca-2026-11-18.md).
+
 A fila permite filtrar **Atribuídos a mim** e usar o atalho **Meus urgentes**. Cada conta pode salvar até dez filtros por empresa com busca, estado, prioridade, responsável (todos ou a própria pessoa) e visualização Lista/Kanban. Aplicar um atalho volta à primeira página. O atalho de urgentes inclui todos os estados; refine o estado antes de salvar se quiser somente os chamados em andamento.
 
 Os atalhos são persistidos no Supabase e ficam disponíveis em outros dispositivos da mesma conta. Colegas não leem filtros pessoais. A demonstração oferece o atalho rápido e informa que a persistência depende de uma conta conectada. Nomes e critérios de busca podem conter informações de trabalho: não são gravados em logs da aplicação, e o registro é removido junto da conta ou empresa.

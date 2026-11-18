@@ -4,6 +4,8 @@
 
 Os filtros pessoais da fila estão implementados e passaram pela validação funcional. As entregas recentes de segurança, MFA, convites e filtros estão na branch `codex/security-phase2` e no [PR #1](https://github.com/kaua-chavesvk/equipedesk/pull/1), ainda em rascunho. Este pacote não foi mesclado na main nem publicado em produção nesta etapa. O Supabase local descartável no CI é diferente do projeto hospedado de homologação.
 
+Atualização operacional de 18/11: o commit `58aabe1` foi publicado no Preview, as duas migrações recentes foram aplicadas ao Supabase de homologação e passaram 22 assertivas SQL remotas e sete verificações HTTP autenticadas. O [relatório de homologação](homologacao-seguranca-2026-11-18.md) registra ambientes, limpeza, limites e as prioridades restantes.
+
 ## Segurança de autenticação
 
 Em produção, há teto global de 600 requisições/minuto para `/api/auth`, 60 por IP conhecido e limite adicional de dez tentativas por combinação de IP com e-mail normalizado no login. Sem IP confiável, o limite adicional usa o e-mail, sob o teto global. As chaves Redis usam HMAC, sem IP ou e-mail em texto puro na chave. Isso reduz o problema do pequeno balde compartilhado; limites globais e controles próprios do Supabase continuam relevantes.
@@ -65,8 +67,10 @@ Nenhuma exceção foi adicionada. Auditoria e validação funcional são indepen
 
 ## Pendências e sequência
 
+Prioridade operacional imediata: o Redis temporário de homologação vence em 19/11/2026. O titular confirmou que ainda não o vinculou à conta Upstash; o link privado de Claim foi recuperado e entregue na conversa. Não foi gravado no repositório. A homologação respondeu aos testes atuais, mas a continuidade depende dessa ativação.
+
 1. Resolver ou revisar formalmente a pendência de dependência com evidência de mitigação/correção.
-2. Aplicar as migrações recentes em homologação e validar as jornadas no ambiente hospedado.
+2. Concluído: aplicar as migrações recentes em homologação e validar SQL e jornada HTTP no ambiente hospedado. Uma nova avaliação visual do Preview não integra esse ensaio.
 3. Preparar administradores e ensaiar recuperação antes de ativar a exigência AAL2 hospedada.
 4. Publicar o código correspondente e conferir o ambiente oficial; este pacote ainda não foi publicado.
 5. Configurar provedor/domínio de e-mail, entrega real, destino de alertas e observabilidade externa.
