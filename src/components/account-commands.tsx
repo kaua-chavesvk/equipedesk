@@ -16,13 +16,23 @@ export function AccountCommands() {
       if (!open && document.querySelector('[role="dialog"]')) return;
       event.preventDefault();
       if (!open) trigger.current = document.activeElement as HTMLElement | null;
-      setOpen(value => !value);
+      setOpen((value) => !value);
     }
     document.addEventListener('keydown', keyboard);
     return () => document.removeEventListener('keydown', keyboard);
   }, [pathname, open]);
 
   const base = pathname.startsWith('/e/') ? pathname.split('/').slice(0, 3).join('/') : undefined;
-  return open && <WorkspaceCommands open onOpenChange={setOpen} base={base} organizations={[]} tickets={[]}
-    restoreFocus={() => trigger.current?.focus()} />;
+  return (
+    open && (
+      <WorkspaceCommands
+        open
+        onOpenChange={setOpen}
+        base={base}
+        organizations={[]}
+        tickets={[]}
+        restoreFocus={() => trigger.current?.focus()}
+      />
+    )
+  );
 }

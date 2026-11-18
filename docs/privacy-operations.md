@@ -97,12 +97,12 @@ Fonte oficial para contratação eletrônica e arrependimento: [Decreto 7.962/20
 
 ## Fornecedores e DPA — revisão pendente
 
-| Fornecedor/função | Situação verificada | Pendências |
-|---|---|---|
-| Vercel / hospedagem | Projeto remoto identificado; variáveis incompletas | DPA/termos vigentes, região, suboperadores, logs/backups, transferências internacionais e retenção |
-| Supabase / Auth e banco | Usuário informou projeto existente; conexão ainda não concluída nesta revisão | Identificação do projeto, migrações, região, contrato/DPA, backups e templates |
-| Redis REST / limite de requisições | Configuração em andamento | Provedor, plano, termos/DPA, região e eliminação das chaves temporárias |
-| E-mail transacional | Não configurado/verificado | SMTP, DPA, rastreamento desativado, autenticação de domínio e supressão |
+| Fornecedor/função                  | Situação verificada                                                           | Pendências                                                                                         |
+| ---------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Vercel / hospedagem                | Projeto remoto identificado; variáveis incompletas                            | DPA/termos vigentes, região, suboperadores, logs/backups, transferências internacionais e retenção |
+| Supabase / Auth e banco            | Usuário informou projeto existente; conexão ainda não concluída nesta revisão | Identificação do projeto, migrações, região, contrato/DPA, backups e templates                     |
+| Redis REST / limite de requisições | Configuração em andamento                                                     | Provedor, plano, termos/DPA, região e eliminação das chaves temporárias                            |
+| E-mail transacional                | Não configurado/verificado                                                    | SMTP, DPA, rastreamento desativado, autenticação de domínio e supressão                            |
 
 Modelo de aditivo, **não assinado e não substitutivo de revisão jurídica**: partes e contatos; definição de controlador/operador; objeto, finalidade e duração; categorias de dados/titulares; instruções documentadas; confidencialidade e controle de acesso; suboperadores e mecanismo de aviso; medidas técnicas; comunicação de incidentes; apoio aos direitos do titular; auditoria/evidências; região e transferências internacionais; devolução, retenção e eliminação no término; responsabilidade e encerramento. Conferir os termos efetivos de cada fornecedor e registrar o aceite por pessoa autorizada. Esta entrega não afirma que um contrato foi celebrado.
 

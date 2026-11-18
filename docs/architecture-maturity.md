@@ -44,7 +44,11 @@ init({
       platform: 'node',
       level: 'error',
       message: 'Falha inesperada no App Router',
-      tags: { route: event.tags?.route, routeType: event.tags?.routeType, requestId: event.tags?.requestId },
+      tags: {
+        route: event.tags?.route,
+        routeType: event.tags?.routeType,
+        requestId: event.tags?.requestId,
+      },
     };
   },
 });

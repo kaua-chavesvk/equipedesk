@@ -37,7 +37,6 @@ Em 13/11/2026, a configuração de produção de `miakaelsondesk.vercel.app` apr
 
 Para provar RLS, repita o acesso pela API de dados do Supabase usando o access token do usuário e a chave pública, conforme os testes SQL. O modo visual sem credenciais não comprova autorização do banco.
 
-
 ## Rollback da aplicação
 
 No painel Vercel, abra Deployments, localize o último deploy de produção validado e use a opção de rollback do projeto. Após a troca, confirme o alias público, abra o login e faça um teste de leitura com uma conta de teste. Registre o deploy restaurado e a causa. Migrações de banco precisam de avaliação separada de compatibilidade e preservação de dados.

@@ -2394,7 +2394,7 @@ exhaustive, and do not form part of our licenses.
      such as asking that all changes be marked or described.
      Although not required by our licenses, you are encouraged to
      respect those requests where reasonable. More_considerations
-     for the public: 
+     for the public:
 	wiki.creativecommons.org/Considerations_for_licensees
 
 =======================================================================
@@ -2751,7 +2751,7 @@ License file not found at package root; review metadata and distribution before 
 License: MIT
 
 ```text
-Copyright 2013 Thorsten Lorenz. 
+Copyright 2013 Thorsten Lorenz.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person

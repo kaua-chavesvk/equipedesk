@@ -36,16 +36,46 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await expect(page.getByRole('heading', { name: 'Tickets', exact: true })).toBeVisible();
   await page.goto('/e/aurora/equipe');
   await expect(page.getByRole('heading', { name: 'Team', exact: true })).toBeVisible();
+  const invitations = page.getByRole('region', { name: 'Company invitations' });
+  await expect(invitations.getByText('No pending invitations.')).toBeVisible();
+  const email = 'renewal-browser@aurora.example';
+  const issued = await page.request.post('/api/empresas/aurora/convites', {
+    headers: { Origin: origin },
+    data: { email, role: 'requester' },
+  });
+  expect(issued.status()).toBe(201);
+  const originalInvitation = await issued.json();
+  await page.reload();
+  const row = invitations.getByRole('listitem').filter({ hasText: email });
+  await expect(row).toBeVisible();
+  page.once('dialog', (dialog) => dialog.accept());
+  await row.getByRole('button', { name: 'Generate new link' }).click();
+  const newLink = invitations.getByRole('textbox', { name: 'Invitation link' });
+  await expect(newLink).toHaveValue(/\/convite\/[a-f0-9]{64}$/);
+  expect(await newLink.inputValue()).not.toContain(originalInvitation.token);
+  await expect(invitations.getByText('New link ready to share.')).toBeVisible();
+  // Wait until the replacement appears in the refreshed list before revoking it.
+  await expect(invitations.getByRole('listitem').filter({ hasText: email })).toHaveCount(1);
+  page.once('dialog', (dialog) => dialog.accept());
+  await row.getByRole('button', { name: 'Revoke invitation' }).click();
+  await expect(invitations.getByText('Invitation revoked.')).toBeVisible();
+  await expect(row).toHaveCount(0);
+  await invitations.getByRole('button', { name: 'Expired', exact: true }).click();
+  await expect(invitations.getByText('No expired invitations.')).toBeVisible();
   await page.goto('/conta/configuracoes');
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  const original = await sharp({ create: { width: 300, height: 400, channels: 3, background: '#002fa7' } }).jpeg().toBuffer();
+  const original = await sharp({
+    create: { width: 300, height: 400, channels: 3, background: '#002fa7' },
+  })
+    .jpeg()
+    .toBuffer();
   const input = page.getByLabel('Choose photo');
   await input.setInputFiles({ name: 'avatar.jpg', mimeType: 'image/jpeg', buffer: original });
   const crop = page.getByRole('dialog', { name: 'Crop photo' });
   await expect(crop).toBeVisible();
   const viewport = crop.getByRole('group', { name: 'Position photo' });
-  await viewport.locator('img').evaluate(image => (image as HTMLImageElement).decode());
+  await viewport.locator('img').evaluate((image) => (image as HTMLImageElement).decode());
   await crop.getByRole('slider', { name: 'Zoom', exact: true }).focus();
   await page.keyboard.press('End');
   await viewport.scrollIntoViewIfNeeded();
@@ -56,13 +86,17 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   await page.mouse.up();
   await viewport.focus();
   await page.keyboard.press('ArrowLeft');
-  const position = await viewport.locator('img').evaluate(image => ({
-    left: parseFloat(image.style.left), top: parseFloat(image.style.top),
+  const position = await viewport.locator('img').evaluate((image) => ({
+    left: parseFloat(image.style.left),
+    top: parseFloat(image.style.top),
   }));
   await expect(crop.getByRole('slider', { name: 'Zoom', exact: true })).toHaveValue('3');
   expect(position.left).toBeGreaterThan(-100);
   expect(position.top).toBeGreaterThan(-150);
-  const stored = page.waitForResponse(response => response.url().endsWith('/api/conta/foto') && response.request().method() === 'POST');
+  const stored = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/api/conta/foto') && response.request().method() === 'POST',
+  );
   await crop.getByRole('button', { name: 'Save photo' }).click();
   expect((await stored).status()).toBe(201);
   const photo = page.locator('.settings-photo img');
@@ -70,7 +104,11 @@ test('salva preferências e nome com sessão real e preserva o layout móvel', a
   const src = await photo.getAttribute('src');
   const image = await page.request.get(src!);
   expect(image.status()).toBe(200);
-  expect(await sharp(await image.body()).metadata()).toMatchObject({ format: 'webp', width: 256, height: 256 });
+  expect(await sharp(await image.body()).metadata()).toMatchObject({
+    format: 'webp',
+    width: 256,
+    height: 256,
+  });
   await page.getByRole('button', { name: 'Remove photo' }).click();
   await expect(photo).toHaveCount(0);
   expect((await page.request.get(src!)).status()).toBe(404);

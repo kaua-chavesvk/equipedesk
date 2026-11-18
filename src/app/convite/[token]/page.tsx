@@ -13,17 +13,33 @@ export default async function Page({ params }: { params: Promise<{ token: string
   if (!configured()) return <InviteAcceptance token={token} />;
 
   const db = await supabaseServer();
-  const { data: { user } } = await db.auth.getUser();
+  const {
+    data: { user },
+  } = await db.auth.getUser();
   if (!user) return <InviteAcceptance token={token} loginRequired />;
 
   const { data, error } = await db.rpc('invite_preview', { p_token: token });
   if (error || !data || typeof data !== 'object' || Array.isArray(data)) {
-    return <InviteAcceptance token={token} unavailable="Não foi possível conferir o convite. Recarregue a página para tentar novamente." />;
+    return (
+      <InviteAcceptance
+        token={token}
+        unavailable="Não foi possível conferir o convite. Recarregue a página para tentar novamente."
+      />
+    );
   }
 
-  if (data.status === 'valid' && typeof data.company === 'string' && typeof data.role === 'string') {
+  if (
+    data.status === 'valid' &&
+    typeof data.company === 'string' &&
+    typeof data.role === 'string'
+  ) {
     return <InviteAcceptance token={token} company={data.company} role={data.role} />;
   }
 
-  return <InviteAcceptance token={token} unavailable={previewErrors[String(data.status)] ?? previewErrors.invalid} />;
+  return (
+    <InviteAcceptance
+      token={token}
+      unavailable={previewErrors[String(data.status)] ?? previewErrors.invalid}
+    />
+  );
 }

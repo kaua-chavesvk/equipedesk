@@ -6,7 +6,11 @@ vi.mock('../../src/lib/supabase/server', () => ({
   configured: () => true,
   supabaseServer: async () => ({
     from: mocks.from,
-    auth: { getUser: async () => ({ data: { user: { id: 'marina', email: 'marina@example.com', user_metadata: {} } } }) },
+    auth: {
+      getUser: async () => ({
+        data: { user: { id: 'marina', email: 'marina@example.com', user_metadata: {} } },
+      }),
+    },
   }),
 }));
 
@@ -21,17 +25,27 @@ describe('carregamento de membros no workspace', () => {
     globalAdmin = false;
     mocks.from.mockImplementation((table: string) => ({
       select: (columns: string) => {
-        const result = table === 'platform_admins'
-          ? {data:globalAdmin?[{user_id:'marina'}]:[],error:null}
-          : table === 'organizations'
-          ? { data: [{ id: 'org', name: 'Aurora', slug: 'aurora' },{id:'other',name:'Outra empresa',slug:'outra'}], error: null }
-          : table === 'tickets' ? { data: [], error: null }
-          : columns === '*' ? { data: [], error: memberError }
-          : { data: [{ organization_id: 'org', role: 'admin' }], error: null };
+        const result =
+          table === 'platform_admins'
+            ? { data: globalAdmin ? [{ user_id: 'marina' }] : [], error: null }
+            : table === 'organizations'
+              ? {
+                  data: [
+                    { id: 'org', name: 'Aurora', slug: 'aurora' },
+                    { id: 'other', name: 'Outra empresa', slug: 'outra' },
+                  ],
+                  error: null,
+                }
+              : table === 'tickets'
+                ? { data: [], error: null }
+                : columns === '*'
+                  ? { data: [], error: memberError }
+                  : { data: [{ organization_id: 'org', role: 'admin' }], error: null };
         const query = {
           eq: () => query,
           order: () => query,
-          then: (resolve: (value: typeof result) => unknown) => Promise.resolve(result).then(resolve),
+          then: (resolve: (value: typeof result) => unknown) =>
+            Promise.resolve(result).then(resolve),
         };
         return query;
       },
@@ -45,16 +59,20 @@ describe('carregamento de membros no workspace', () => {
 
   it('aceita uma consulta bem-sucedida sem membros retornados', async () => {
     await expect(getWorkspace('aurora')).resolves.toMatchObject({
-      organization: { slug: 'aurora', role: 'admin' }, members: [], demo: false,
+      organization: { slug: 'aurora', role: 'admin' },
+      members: [],
+      demo: false,
     });
   });
 
-  it('permite administrador geral em empresa sem associação local',async()=>{
-    globalAdmin=true;
-    await expect(getWorkspace('outra')).resolves.toMatchObject({organization:{slug:'outra',role:'admin',platform_admin:true}});
+  it('permite administrador geral em empresa sem associação local', async () => {
+    globalAdmin = true;
+    await expect(getWorkspace('outra')).resolves.toMatchObject({
+      organization: { slug: 'outra', role: 'admin', platform_admin: true },
+    });
   });
 
-  it('não transforma acesso sem vínculo em acesso administrativo',async()=>{
+  it('não transforma acesso sem vínculo em acesso administrativo', async () => {
     await expect(getWorkspace('outra')).rejects.toThrow('Empresa não encontrada.');
   });
 });
