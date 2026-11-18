@@ -69,6 +69,6 @@ SMTP e alertas externos continuam dependentes de configuração dos provedores. 
 
 - [x] Publicar o pacote validado no Preview e aplicar as duas migrações somente no projeto de homologação.
 - [x] Executar 22 assertivas SQL remotas com rollback e sete verificações HTTP autenticadas; remover fixtures e contas sintéticas.
-- [ ] Titular concluir o Claim do Redis temporário de homologação antes da expiração em 19/11/2026; link privado entregue na conversa.
+- [x] Titular informou conclusão do Claim do Redis de homologação em 18/11/2026. Credenciais existentes responderam PONG após a vinculação; login do Preview respondeu HTTP 200. A expiração no painel da conta não foi inspecionada.
 - [ ] Preparar administradores reais e validar recuperação antes de exigir AAL2.
 - [ ] Resolver ou revisar formalmente o alerta picomatch com evidência de mitigação/correção; auditoria segue ativa.

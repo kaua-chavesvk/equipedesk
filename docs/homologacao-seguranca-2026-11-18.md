@@ -60,3 +60,11 @@ A conferência final confirmou zero contas e zero empresas do ensaio. Os arquivo
 - A resposta de provisionamento do Redis temporário foi recuperada em armazenamento local protegido e confirmou expiração em 19/11/2026. O titular informou que ainda não realizou o Claim. O painel privado foi fornecido fora do repositório para vinculação à conta Upstash. O ensaio de hoje confirmou funcionamento, não extensão da validade. Aguardando essa ação autenticada do titular.
 - Nenhum pacote desta frente foi publicado em produção nesta operação.
 - E-mail transacional, alertas externos, restauração de arquivos Storage e recuperação real de conta continuam pendentes.
+
+## Verificação após vinculação do Redis
+
+Em 18/11/2026, o titular informou que concluiu o Claim na conta Upstash. A verificação posterior confirmou `PING → PONG` com as credenciais já configuradas e HTTP 200 em `/login` no Preview, acessado pelo CLI autorizado da Vercel. Nenhuma variável foi trocada e nenhum deployment adicional foi necessário. O HTTP 200 confere a disponibilidade da página; não representa um novo teste de login autenticado.
+
+A consulta idempotente ao provisionamento temporário retornou `not found`. Por isso, a vinculação fica registrada como confirmação do titular; funcionamento foi verificado diretamente, mas a política de expiração/plano na conta não foi inspecionada. O registro de espera acima descreve o momento anterior à confirmação. Nenhuma credencial ou URL privada de vinculação foi publicada.
+
+A próxima dependência operacional é preparar os administradores reais e ensaiar recuperação de MFA antes de ativar a exigência de AAL2.
