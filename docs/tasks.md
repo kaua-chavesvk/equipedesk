@@ -1,14 +1,14 @@
 # Plano de entrega e critérios de aceite
 
-| Etapa | Dependência | Propriedade | Critério de aceite |
-|---|---|---|---|
-| Contrato | Repositório inspecionado | Coordenação e verificação | Endpoints, estados, papéis, limites e erros documentados antes da integração |
-| Fundação | Contrato | Coordenação | Next.js, TypeScript estrito, pnpm e lockfile; configurações compartilhadas |
-| Dados | Contrato | Agente A — `supabase/**`, tipos | Migração reproduzível; RLS; comandos transacionais; teste de isolamento |
-| Interface | Contrato | Agente B — páginas e componentes | Desktop e celular, abertura, conversa, estados de erro e troca de empresa |
-| Verificação | Contrato | Agente C — testes, scripts, docs, CI | Regras unitárias, cenários SQL e navegador, roteiro reproduzível |
-| Integração | Fundação, dados, interface | Coordenação — API e sessão | Jornada real abre, atribui, comenta, resolve e reabre |
-| Entrega | Integração | Coordenação | Lint, tipos, testes e build executados; limitações e dependências declaradas |
+| Etapa       | Dependência                | Propriedade                           | Critério de aceite                                                           |
+| ----------- | -------------------------- | ------------------------------------- | ---------------------------------------------------------------------------- |
+| Contrato    | Repositório inspecionado   | Definição e revisão de contratos      | Endpoints, estados, papéis, limites e erros documentados antes da integração |
+| Fundação    | Contrato                   | Integração técnica                    | Next.js, TypeScript estrito, pnpm e lockfile; configurações compartilhadas   |
+| Dados       | Contrato                   | Banco de dados — `supabase/**`, tipos | Migração reproduzível; RLS; comandos transacionais; teste de isolamento      |
+| Interface   | Contrato                   | Interface — páginas e componentes     | Desktop e celular, abertura, conversa, estados de erro e troca de empresa    |
+| Verificação | Contrato                   | Qualidade — testes, scripts, docs, CI | Regras unitárias, cenários SQL e navegador, roteiro reproduzível             |
+| Integração  | Fundação, dados, interface | Integração técnica — API e sessão     | Jornada real abre, atribui, comenta, resolve e reabre                        |
+| Entrega     | Integração                 | Integração técnica                    | Lint, tipos, testes e build executados; limitações e dependências declaradas |
 
 ## Cenários obrigatórios
 
@@ -38,7 +38,7 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Implementar filtros, contagens e paginação no banco, com detalhe consultado por ID.
 - [x] Adicionar perfis para identificar membros, autores e responsáveis.
 - [x] Unificar a linha do tempo com eventos persistidos e completar a gestão de convites pendentes.
-- [ ] Validar as jornadas com Supabase real e credenciais de usuário.
+- [x] Validar jornadas autenticadas com Supabase em homologação; evidências no relatório de 18/11.
 
 ## Correções de 13/11/2026
 
@@ -48,7 +48,7 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Limitar a espera em requisições ao Supabase.
 - [x] Retirar o aviso de escolha de cookies opcionais inativos e neutralizar o título do login.
 - [x] Unificar comentários e eventos em ordem cronológica.
-- [ ] Executar a suíte SQL, testes com sessões reais e validar a migração de convite em staging.
+- [x] Executar SQL, sessões reais e migração de convites em homologação; evidências no relatório de 18/11.
 - [x] Implementar listagem, reemissão e cancelamento de convites pendentes.
 - [ ] Validar entrega de e-mails, backups, retenção e alertas externos.
 

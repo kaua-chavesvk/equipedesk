@@ -1,5 +1,7 @@
 # EquipeDesk — estado do trabalho em 18/11/2026
 
+> Totais históricos: os números abaixo pertencem às execuções descritas. Para o resultado vigente, consulte [validação atual](validacao-atual.md).
+
 ## Resultado e ambientes
 
 Os filtros pessoais da fila estão implementados e passaram pela validação funcional. As entregas recentes de segurança, MFA, convites e filtros estão na branch `codex/security-phase2` e no [PR #1](https://github.com/kaua-chavesvk/equipedesk/pull/1), ainda em rascunho. Este pacote não foi mesclado na main nem publicado em produção nesta etapa. O Supabase local descartável no CI é diferente do projeto hospedado de homologação.

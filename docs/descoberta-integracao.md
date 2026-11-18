@@ -1,5 +1,7 @@
 # Descoberta da integração — Fase 1
 
+> Totais históricos: os números abaixo pertencem às execuções descritas. Para o resultado vigente, consulte [validação atual](validacao-atual.md).
+
 Data da revisão: **16/11/2026**, fuso America/Sao_Paulo. Repositório: [kaua-chavesvk/equipedesk](https://github.com/kaua-chavesvk/equipedesk). Base local e `origin/main` conferidas no commit `d4a6bd4716c206a1099f58243aafc974a3de783a`.
 
 ## Escopo e conclusão
@@ -18,18 +20,18 @@ Esta entrega encerra a Fase 1. A única alteração de projeto é este relatóri
 
 ## 1. Evidências desta execução
 
-| Comando/verificação | Resultado real nesta revisão |
-|---|---|
-| `pnpm install --frozen-lockfile` | Aprovado; dependências já atualizadas, lockfile preservado; pnpm 11.25.0 |
-| `pnpm lint` | Aprovado, saída 0 |
-| `pnpm typecheck` | Aprovado; geração de tipos de rotas e TypeScript, saída 0 |
-| `pnpm test` | Aprovado; **81 testes em 13 arquivos**, saída 0 |
-| `pnpm build` | Aprovado; webpack, TypeScript, geração de páginas e traces, saída 0 |
-| `node scripts/scan-secrets.mjs --require-history` | Arquivos atuais e histórico inspecionados; `findings: []` |
-| `node scripts/check-legal.mjs` | Documentos versionados e rodapés dos seis templates conferidos |
-| `git ls-remote origin refs/heads/main` | SHA remoto igual ao commit local informado acima |
-| GitHub: `repo:kaua-chavesvk/equipedesk is:issue is:open` | Nenhuma Issue aberta retornada pelo conector |
-| GitHub: `repo:kaua-chavesvk/equipedesk is:pr is:open` | Nenhuma Pull Request aberta retornada pelo conector |
+| Comando/verificação                                      | Resultado real nesta revisão                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm install --frozen-lockfile`                         | Aprovado; dependências já atualizadas, lockfile preservado; pnpm 11.25.0 |
+| `pnpm lint`                                              | Aprovado, saída 0                                                        |
+| `pnpm typecheck`                                         | Aprovado; geração de tipos de rotas e TypeScript, saída 0                |
+| `pnpm test`                                              | Aprovado; **81 testes em 13 arquivos**, saída 0                          |
+| `pnpm build`                                             | Aprovado; webpack, TypeScript, geração de páginas e traces, saída 0      |
+| `node scripts/scan-secrets.mjs --require-history`        | Arquivos atuais e histórico inspecionados; `findings: []`                |
+| `node scripts/check-legal.mjs`                           | Documentos versionados e rodapés dos seis templates conferidos           |
+| `git ls-remote origin refs/heads/main`                   | SHA remoto igual ao commit local informado acima                         |
+| GitHub: `repo:kaua-chavesvk/equipedesk is:issue is:open` | Nenhuma Issue aberta retornada pelo conector                             |
+| GitHub: `repo:kaua-chavesvk/equipedesk is:pr is:open`    | Nenhuma Pull Request aberta retornada pelo conector                      |
 
 O ambiente desta execução usa **Node.js 26.13.1**, inclusive em `pnpm exec node --version`; o README e a CI especificam Node.js 24. O Vitest emitiu aviso de configuração ESM carregada como CommonJS; testes e build também emitiram aviso de depreciação de `module.register()`. Esses avisos não reprovaram as verificações. A reprodução em Node.js 24 continua sendo o padrão para homologação.
 
@@ -57,14 +59,14 @@ São sete arquivos `route.ts` sob `src/app/api/`, cobrindo 18 combinações prin
 
 `POST /api/auth` recebe um dos objetos abaixo. Sucesso retorna 200 com `redirect` e, quando aplicável, `message`.
 
-| `action` | Payload adicional | Permissão/comportamento |
-|---|---|---|
-| `login` | `email`, `password` de no mínimo 8 caracteres | Autenticação Supabase; falha do provedor normalmente é convertida em 422 |
-| `signup` | `email`, `password`, `name?` de 1–100 caracteres; `termsAccepted: true`, `adultConfirmed: true`, `termsVersion`, `privacyVersion`; `marketingConsent?` booleano, padrão false | Versões atuais exigidas: `2026-11-12`; cadastro não concede privilégio global |
-| `recover` | `email` | Solicita e-mail de recuperação; resposta genérica também quando o provedor devolve erro no resultado |
-| `update_password` | `password` de no mínimo 8 caracteres | Exige usuário autenticado; 401 sem sessão |
-| `logout` | Nenhum | Encerra sessão; redirecionamento informado para login |
-| `demo` | Nenhum | Só sem Supabase configurado; em produção também exige `DEMO_MODE=true`; retorna `/e/aurora`; 403 quando desativado |
+| `action`          | Payload adicional                                                                                                                                                             | Permissão/comportamento                                                                                            |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `login`           | `email`, `password` de no mínimo 8 caracteres                                                                                                                                 | Autenticação Supabase; falha do provedor normalmente é convertida em 422                                           |
+| `signup`          | `email`, `password`, `name?` de 1–100 caracteres; `termsAccepted: true`, `adultConfirmed: true`, `termsVersion`, `privacyVersion`; `marketingConsent?` booleano, padrão false | Versões atuais exigidas: `2026-11-12`; cadastro não concede privilégio global                                      |
+| `recover`         | `email`                                                                                                                                                                       | Solicita e-mail de recuperação; resposta genérica também quando o provedor devolve erro no resultado               |
+| `update_password` | `password` de no mínimo 8 caracteres                                                                                                                                          | Exige usuário autenticado; 401 sem sessão                                                                          |
+| `logout`          | Nenhum                                                                                                                                                                        | Encerra sessão; redirecionamento informado para login                                                              |
+| `demo`            | Nenhum                                                                                                                                                                        | Só sem Supabase configurado; em produção também exige `DEMO_MODE=true`; retorna `/e/aurora`; 403 quando desativado |
 
 Sem Supabase, ações reais retornam 422. Validação de entrada retorna 422; falhas inesperadas podem retornar 500. O tratamento de infraestrutura ainda não é uniforme, conforme riscos abaixo.
 
@@ -74,21 +76,21 @@ Sem Supabase, ações reais retornam 422. Validação de entrada retorna 422; fa
 
 `B` representa `/api/empresas/{slug}`. Administrador geral é resolvido pelo banco como administrador de qualquer empresa existente.
 
-| Método e caminho | Entrada | Sucesso | Permissão e falhas de domínio principais |
-|---|---|---|---|
-| POST `/api/empresas` | `{name,slug}`; nome 2–100, slug 2–60, letras minúsculas/números e hífens entre grupos | 201; RPC retorna `{id,slug}` | Sessão e aceite legal; cria primeiro administrador na mesma transação; 401, 409 por duplicação, 422 |
-| POST `/api/convites/aceitar` | `{token}` de 32–256 caracteres | 200 `{id,slug}` | Sessão, aceite atual, e-mail confirmado correspondente; 401/403/404/409; 503 para determinados erros de autenticação/RPC; demonstração retorna 422 |
-| GET `B/painel` | Sem corpo | 200 `{open,in_progress,resolved,total}` | Membro ou administrador geral; solicitante conta apenas próprios chamados; 401/404 |
-| GET `B/chamados` | `q`, `status`, `priority`, `page`, `pageSize` | 200 `{data,total,page,pageSize}` | Fila conforme papel; 401/404/422 |
-| POST `B/chamados` | `{title,description,priority?}` | 201, chamado criado | Todos os membros; autor e empresa resolvidos pelo servidor; 401/404/422/429 |
-| GET `B/chamados/{id}` | UUID no caminho | 200 `{ticket,comments,events}` | Solicitante apenas próprios; atendente/admin fila da empresa; 401/404 |
-| POST `B/chamados/{id}/comentarios` | `{body}` | 201; RPC retorna `{id}` | Mesmo acesso de leitura do chamado; 401/404/422/429 |
-| POST `B/chamados/{id}/transicoes` | `{action,version,reason?}` | 200, chamado atualizado | Atribuir/resolver: atendente/admin; reabrir: quem pode ler; 401/403/404/409/422/429 |
-| GET `B/membros` | Sem corpo | 200 `{data}` | Handler restringe a administrador; 401/403/404; dados reais atuais não enriquecem perfil/e-mail dos outros membros |
-| PATCH `B/membros/{id}` | `{role}`; ID do usuário | 200 `{id}` | Administrador; 401/403/404/409/422/429; não rebaixa último administrador |
-| DELETE `B/membros/{id}` | Sem corpo | 200 `{id}` | Administrador; 401/403/404/409/429; não remove último administrador; preserva histórico |
-| POST `B/convites` | `{email,role}` | 201 `{id,token,expires_in_days:7}` | Administrador; 401/403/404/422/429; gera token, não envia e-mail; demonstração retorna 422 |
-| DELETE `B/convites/{id}` | Sem corpo | 200 `{id}` | Administrador; 401/403/404/429; revoga convite pendente |
+| Método e caminho                   | Entrada                                                                               | Sucesso                                 | Permissão e falhas de domínio principais                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST `/api/empresas`               | `{name,slug}`; nome 2–100, slug 2–60, letras minúsculas/números e hífens entre grupos | 201; RPC retorna `{id,slug}`            | Sessão e aceite legal; cria primeiro administrador na mesma transação; 401, 409 por duplicação, 422                                                |
+| POST `/api/convites/aceitar`       | `{token}` de 32–256 caracteres                                                        | 200 `{id,slug}`                         | Sessão, aceite atual, e-mail confirmado correspondente; 401/403/404/409; 503 para determinados erros de autenticação/RPC; demonstração retorna 422 |
+| GET `B/painel`                     | Sem corpo                                                                             | 200 `{open,in_progress,resolved,total}` | Membro ou administrador geral; solicitante conta apenas próprios chamados; 401/404                                                                 |
+| GET `B/chamados`                   | `q`, `status`, `priority`, `page`, `pageSize`                                         | 200 `{data,total,page,pageSize}`        | Fila conforme papel; 401/404/422                                                                                                                   |
+| POST `B/chamados`                  | `{title,description,priority?}`                                                       | 201, chamado criado                     | Todos os membros; autor e empresa resolvidos pelo servidor; 401/404/422/429                                                                        |
+| GET `B/chamados/{id}`              | UUID no caminho                                                                       | 200 `{ticket,comments,events}`          | Solicitante apenas próprios; atendente/admin fila da empresa; 401/404                                                                              |
+| POST `B/chamados/{id}/comentarios` | `{body}`                                                                              | 201; RPC retorna `{id}`                 | Mesmo acesso de leitura do chamado; 401/404/422/429                                                                                                |
+| POST `B/chamados/{id}/transicoes`  | `{action,version,reason?}`                                                            | 200, chamado atualizado                 | Atribuir/resolver: atendente/admin; reabrir: quem pode ler; 401/403/404/409/422/429                                                                |
+| GET `B/membros`                    | Sem corpo                                                                             | 200 `{data}`                            | Handler restringe a administrador; 401/403/404; dados reais atuais não enriquecem perfil/e-mail dos outros membros                                 |
+| PATCH `B/membros/{id}`             | `{role}`; ID do usuário                                                               | 200 `{id}`                              | Administrador; 401/403/404/409/422/429; não rebaixa último administrador                                                                           |
+| DELETE `B/membros/{id}`            | Sem corpo                                                                             | 200 `{id}`                              | Administrador; 401/403/404/409/429; não remove último administrador; preserva histórico                                                            |
+| POST `B/convites`                  | `{email,role}`                                                                        | 201 `{id,token,expires_in_days:7}`      | Administrador; 401/403/404/422/429; gera token, não envia e-mail; demonstração retorna 422                                                         |
+| DELETE `B/convites/{id}`           | Sem corpo                                                                             | 200 `{id}`                              | Administrador; 401/403/404/429; revoga convite pendente                                                                                            |
 
 Detalhes dos campos:
 
@@ -100,12 +102,12 @@ Detalhes dos campos:
 
 ### Privacidade e cookies
 
-| Método e caminho | Entrada/retorno | Permissão e falhas |
-|---|---|---|
-| GET `/api/privacidade` | Retorna conta, aceites, preferência de marketing e até 100 pedidos/aceites, com descrição do escopo | Sessão; 401, 422 em demonstração; consultas com erro podem retornar 500 |
-| POST `/api/privacidade` | Um dos comandos abaixo | Sessão; 200, exceto criação de pedido 201; 401/403/404/409/422/429 conforme comando |
-| POST `/api/privacidade/descadastro` | `{token}` hexadecimal de 64 caracteres; 200 com mensagem genérica | Token opaco, sem exigir login; continua sujeito a CSRF/origem e limitador; 422 sem Supabase; erro da RPC é convertido em erro genérico 500 |
-| POST `/api/consentimento/cookies` | `{optional:boolean}`; 200 `{saved:true}` | Não exige login; CSRF e limite comuns; grava cookie necessário HttpOnly/SameSite=Lax por 180 dias, Secure em produção |
+| Método e caminho                    | Entrada/retorno                                                                                     | Permissão e falhas                                                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET `/api/privacidade`              | Retorna conta, aceites, preferência de marketing e até 100 pedidos/aceites, com descrição do escopo | Sessão; 401, 422 em demonstração; consultas com erro podem retornar 500                                                                    |
+| POST `/api/privacidade`             | Um dos comandos abaixo                                                                              | Sessão; 200, exceto criação de pedido 201; 401/403/404/409/422/429 conforme comando                                                        |
+| POST `/api/privacidade/descadastro` | `{token}` hexadecimal de 64 caracteres; 200 com mensagem genérica                                   | Token opaco, sem exigir login; continua sujeito a CSRF/origem e limitador; 422 sem Supabase; erro da RPC é convertido em erro genérico 500 |
+| POST `/api/consentimento/cookies`   | `{optional:boolean}`; 200 `{saved:true}`                                                            | Não exige login; CSRF e limite comuns; grava cookie necessário HttpOnly/SameSite=Lax por 180 dias, Secure em produção                      |
 
 Comandos de `POST /api/privacidade`:
 
@@ -122,22 +124,22 @@ O endpoint de cookies ainda existe, mas o rodapé atual não pede consentimento 
 
 ## 3. Modelo de dados e autorização
 
-| Entidade | Chaves, campos e relações relevantes | Autorização/retenção |
-|---|---|---|
-| `auth.users` | Identidade Supabase; e-mail, confirmação e metadados | Senha e sessão pertencem ao provedor; referências de usuários nas entidades do produto |
-| `public.organizations` | UUID; `name`, `slug` único, `created_at` | Leitura por associação ou privilégio global |
-| `public.memberships` | PK composta `(organization_id,user_id)`; `role` | Vínculo por empresa; remoção não elimina usuário/histórico; comandos protegem último administrador |
-| `public.invitations` | UUID, empresa, e-mail normalizado, papel, hash único, autor, expiração, aceite e revogação | Administração por empresa; token bruto não é armazenado; uso único, validade sete dias; token_hash não recebe grant de leitura do cliente |
-| `public.tickets` | UUID, empresa, solicitante, responsável opcional, título, descrição, prioridade, estado, versão, timestamps; unique `(organization_id,id)` | Solicitante lê próprios; atendente/admin lê empresa; mutações por comando; referência para comentários/eventos |
-| `public.comments` | UUID, empresa, chamado, autor, texto, data; FK composta `(organization_id,ticket_id)` | Mesmo acesso de leitura do chamado; empresa não pode ser trocada para associar conteúdo de outra organização |
-| `public.ticket_events` | UUID, empresa, chamado, ator, tipo e payload JSONB, data; FK composta | Mesmo acesso do chamado; eventos de criação, comentário e transições gerados atomicamente |
-| `public.platform_admins` | `user_id` PK; timestamp | Usuário consulta próprio registro; provisionamento/revogação fora do fluxo web; amplia papel efetivo a admin de todas as empresas |
-| `public.legal_acceptances` | UUID, usuário anulável, subject_hash, tipo, versões/digests, fonte, data e delete_after | Titular ou admin geral lê; evidencia aceite/revogação |
-| `public.privacy_preferences` | `user_id` PK, marketing, hash único de descadastro, data | Titular lê; RPC autenticada e descadastro por token opaco |
-| `public.privacy_requests` | UUID, titular anulável, subject_hash, tipo, detalhes, status, resposta, prazos | Titular/admin geral lê; apenas admin geral responde |
-| `private.command_rate` | PK `(user_id,window_start)`, contador | Sem acesso de anon/authenticated; quota interna dos comandos de atendimento |
-| `private.retention_holds` | `ticket_id` PK, justificativa, validade | Retenção administrativa; restringe descarte de chamado |
-| `private.retention_runs` | UUID, data e contagens de descarte | Auditoria administrativa de retenção, mantida pela rotina por 90 dias |
+| Entidade                     | Chaves, campos e relações relevantes                                                                                                       | Autorização/retenção                                                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth.users`                 | Identidade Supabase; e-mail, confirmação e metadados                                                                                       | Senha e sessão pertencem ao provedor; referências de usuários nas entidades do produto                                                    |
+| `public.organizations`       | UUID; `name`, `slug` único, `created_at`                                                                                                   | Leitura por associação ou privilégio global                                                                                               |
+| `public.memberships`         | PK composta `(organization_id,user_id)`; `role`                                                                                            | Vínculo por empresa; remoção não elimina usuário/histórico; comandos protegem último administrador                                        |
+| `public.invitations`         | UUID, empresa, e-mail normalizado, papel, hash único, autor, expiração, aceite e revogação                                                 | Administração por empresa; token bruto não é armazenado; uso único, validade sete dias; token_hash não recebe grant de leitura do cliente |
+| `public.tickets`             | UUID, empresa, solicitante, responsável opcional, título, descrição, prioridade, estado, versão, timestamps; unique `(organization_id,id)` | Solicitante lê próprios; atendente/admin lê empresa; mutações por comando; referência para comentários/eventos                            |
+| `public.comments`            | UUID, empresa, chamado, autor, texto, data; FK composta `(organization_id,ticket_id)`                                                      | Mesmo acesso de leitura do chamado; empresa não pode ser trocada para associar conteúdo de outra organização                              |
+| `public.ticket_events`       | UUID, empresa, chamado, ator, tipo e payload JSONB, data; FK composta                                                                      | Mesmo acesso do chamado; eventos de criação, comentário e transições gerados atomicamente                                                 |
+| `public.platform_admins`     | `user_id` PK; timestamp                                                                                                                    | Usuário consulta próprio registro; provisionamento/revogação fora do fluxo web; amplia papel efetivo a admin de todas as empresas         |
+| `public.legal_acceptances`   | UUID, usuário anulável, subject_hash, tipo, versões/digests, fonte, data e delete_after                                                    | Titular ou admin geral lê; evidencia aceite/revogação                                                                                     |
+| `public.privacy_preferences` | `user_id` PK, marketing, hash único de descadastro, data                                                                                   | Titular lê; RPC autenticada e descadastro por token opaco                                                                                 |
+| `public.privacy_requests`    | UUID, titular anulável, subject_hash, tipo, detalhes, status, resposta, prazos                                                             | Titular/admin geral lê; apenas admin geral responde                                                                                       |
+| `private.command_rate`       | PK `(user_id,window_start)`, contador                                                                                                      | Sem acesso de anon/authenticated; quota interna dos comandos de atendimento                                                               |
+| `private.retention_holds`    | `ticket_id` PK, justificativa, validade                                                                                                    | Retenção administrativa; restringe descarte de chamado                                                                                    |
+| `private.retention_runs`     | UUID, data e contagens de descarte                                                                                                         | Auditoria administrativa de retenção, mantida pela rotina por 90 dias                                                                     |
 
 RLS está habilitada nas tabelas públicas da aplicação. Grants retiram escrita direta de `anon`/`authenticated` nas entidades de atendimento; `desk_command` é `SECURITY DEFINER`, usa `search_path=''` e valida `auth.uid()`, empresa, campos, papel, estado e versão. `private.role_in` e `private.can_read_ticket` resolvem acesso. `privacy_command` tem regras próprias e `unsubscribe_marketing` é executável por anon/authenticated mediante token. `run_privacy_retention` é exclusiva do processo administrativo, sem disponibilizar chave privilegiada no servidor web.
 
@@ -156,19 +158,19 @@ O README registra cinco migrações aplicadas em produção. A presença local d
 
 ## 4. O que existe para e-mail e o que falta
 
-| Capacidade | Estado encontrado |
-|---|---|
-| Confirmação, recuperação, magic link, convite Auth, troca de e-mail e reautenticação | Seis templates locais do Supabase e chamadas de Auth; configuração TOML exige confirmação e OTP de 900 segundos; entrega hospedada não verificada nesta revisão |
-| Convite de participação em empresa | Comando gera token e interface oferece copiar/compartilhar link; não há envio automático pelo endpoint de convites |
-| Abertura automática por e-mail | Não implementada; sem endpoint de recebimento nem conector de caixa |
-| Respostas por e-mail como comentários | Não implementadas; sem identidade/verificação do remetente e associação autorizada de conversa |
-| Notificações de chamado por e-mail | Não implementadas; sem provedor de saída, fila/outbox e status de entrega |
-| Duplicação, tentativas e replay | Sem `Idempotency-Key`, ledger de mensagens ou identificador externo com unicidade por integração/empresa |
-| Conversas e prevenção de loops | Sem armazenamento de Message-ID, In-Reply-To/References ou tratamento de respostas automáticas/bounces |
-| Anexos/MIME/HTML | Uploads não existem no produto; API atual aceita JSON com texto e limite de 32 KiB; não há parser de e-mail bruto nem política de anexos |
-| Filas e worker | Há exemplos em `docs/architecture-maturity.md`, sem tabelas/consumidor correspondentes nas migrações ou Edge Function implementada |
-| Observabilidade | Proxy com eventos de segurança e logger em parte das APIs; Sentry e alertas externos são propostas documentadas, não integração instalada |
-| Cache | Opt-in `TICKET_CACHE_ENABLED`; chave por empresa/usuário/papel/filtros, janela de revalidação de 20 s, invalidação por tag nas escritas HTTP de criação/transição. Estado remoto da flag não foi consultado |
+| Capacidade                                                                           | Estado encontrado                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Confirmação, recuperação, magic link, convite Auth, troca de e-mail e reautenticação | Seis templates locais do Supabase e chamadas de Auth; configuração TOML exige confirmação e OTP de 900 segundos; entrega hospedada não verificada nesta revisão                                             |
+| Convite de participação em empresa                                                   | Comando gera token e interface oferece copiar/compartilhar link; não há envio automático pelo endpoint de convites                                                                                          |
+| Abertura automática por e-mail                                                       | Não implementada; sem endpoint de recebimento nem conector de caixa                                                                                                                                         |
+| Respostas por e-mail como comentários                                                | Não implementadas; sem identidade/verificação do remetente e associação autorizada de conversa                                                                                                              |
+| Notificações de chamado por e-mail                                                   | Não implementadas; sem provedor de saída, fila/outbox e status de entrega                                                                                                                                   |
+| Duplicação, tentativas e replay                                                      | Sem `Idempotency-Key`, ledger de mensagens ou identificador externo com unicidade por integração/empresa                                                                                                    |
+| Conversas e prevenção de loops                                                       | Sem armazenamento de Message-ID, In-Reply-To/References ou tratamento de respostas automáticas/bounces                                                                                                      |
+| Anexos/MIME/HTML                                                                     | Uploads não existem no produto; API atual aceita JSON com texto e limite de 32 KiB; não há parser de e-mail bruto nem política de anexos                                                                    |
+| Filas e worker                                                                       | Há exemplos em `docs/architecture-maturity.md`, sem tabelas/consumidor correspondentes nas migrações ou Edge Function implementada                                                                          |
+| Observabilidade                                                                      | Proxy com eventos de segurança e logger em parte das APIs; Sentry e alertas externos são propostas documentadas, não integração instalada                                                                   |
+| Cache                                                                                | Opt-in `TICKET_CACHE_ENABLED`; chave por empresa/usuário/papel/filtros, janela de revalidação de 20 s, invalidação por tag nas escritas HTTP de criação/transição. Estado remoto da flag não foi consultado |
 
 Para a Fase 2, o contrato deverá definir associação da caixa à empresa, identidade de quem pode abrir/comentar, política para remetentes externos, escopo das credenciais, deduplicação, tratamento de falhas e retenção. O cabeçalho From não substitui uma sessão Supabase nem uma autorização. Não usar chave administrativa no processo web para resolver essa lacuna.
 
@@ -178,21 +180,21 @@ Também será necessário inventariar as categorias de dados encaminhadas ao pro
 
 As constatações abaixo vêm da inspeção estática, salvo evidência explícita. Não foram abertas Issues automaticamente.
 
-| Prioridade | Constatação e impacto | Evidência/encaminhamento |
-|---|---|---|
-| Bloqueador de escopo | E-mail definido, mas direção, provedor, resultado e aprovações ainda pendentes | Impede escolher contrato e estimativa sem assumir requisitos |
-| Alta | API atual é voltada a sessão/cookies e origem canônica; não oferece autenticação de conector/webhook | `src/proxy.ts`, `src/lib/supabase/server.ts`; definir identidade e autorização por empresa na Fase 2 |
-| Alta | Criação de chamado/comentário sem idempotência de integração pode duplicar conteúdo em retries | Rotas de criação e SQL não têm chave externa/ledger; planejar unicidade e atomicidade antes de receber mensagens |
-| Alta | Infraestrutura não é sempre classificada como 503 | `src/lib/http/api.ts` converte erros genéricos em 500; handlers RPC lançam `Error`; consultas lançam objetos do Supabase. Autenticação converte erros do provedor em 422; helpers de sessão podem resultar em 401. Alinhar antes do contrato externo |
-| Alta | Recuperação pode responder sucesso mesmo com erro retornado pelo provedor | `src/app/api/auth/route.ts` exclui `recover` do lançamento de erro; manter proteção contra enumeração sem ocultar indisponibilidade operacional |
-| Alta | Falta comprovar migração de prévia do convite em homologação/remoto | Sexta migração local versus cinco registradas no README; verificar em ambiente separado antes do fluxo real |
-| Alta para recebimento | Falta modelo de identidade do remetente e escopo da caixa | Evitar autorizar por endereço From ou criar usuários/vínculos automaticamente; exige decisão explícita |
-| Média | Algumas mensagens de validação chegam em inglês | `failure` devolve mensagem padrão Zod; enum de prioridade inválida reproduzido localmente: `Invalid option: expected one of ...`; padronizar pt-BR |
-| Média | Desvio de runtime local | Node 26.13.1 nesta execução versus Node 24 especificado; reproduzir homologação/CI em Node 24 |
-| Média | Documentos históricos misturam pendências resolvidas com estado atual | Exemplos: Git antes indisponível, SQL antes não executado e linha do tempo ainda pendente em trechos antigos; consultar evidências datadas e consolidar depois |
-| Média | Invalidação de cache não cobre escritas externas, retenção ou futuro worker | Se a flag for ativada, consumidores externos precisam do protocolo de invalidação; não foi detectado vazamento entre empresas nesta revisão |
-| Média | Logs de duração não envolvem todas as rotas | `observeApi` cobre Auth, catch-all e privacidade; empresas, aceite de convite e cookies não têm esse wrapper. Não há evidência de alertas/Sentry ativos |
-| Dependente de volume | Paginação por offset e lock por organização | Polling e importação precisam tratar movimentação da fila; sem cursor/watermark e sem teste de carga nesta fase |
+| Prioridade            | Constatação e impacto                                                                                | Evidência/encaminhamento                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bloqueador de escopo  | E-mail definido, mas direção, provedor, resultado e aprovações ainda pendentes                       | Impede escolher contrato e estimativa sem assumir requisitos                                                                                                                                                                                         |
+| Alta                  | API atual é voltada a sessão/cookies e origem canônica; não oferece autenticação de conector/webhook | `src/proxy.ts`, `src/lib/supabase/server.ts`; definir identidade e autorização por empresa na Fase 2                                                                                                                                                 |
+| Alta                  | Criação de chamado/comentário sem idempotência de integração pode duplicar conteúdo em retries       | Rotas de criação e SQL não têm chave externa/ledger; planejar unicidade e atomicidade antes de receber mensagens                                                                                                                                     |
+| Alta                  | Infraestrutura não é sempre classificada como 503                                                    | `src/lib/http/api.ts` converte erros genéricos em 500; handlers RPC lançam `Error`; consultas lançam objetos do Supabase. Autenticação converte erros do provedor em 422; helpers de sessão podem resultar em 401. Alinhar antes do contrato externo |
+| Alta                  | Recuperação pode responder sucesso mesmo com erro retornado pelo provedor                            | `src/app/api/auth/route.ts` exclui `recover` do lançamento de erro; manter proteção contra enumeração sem ocultar indisponibilidade operacional                                                                                                      |
+| Alta                  | Falta comprovar migração de prévia do convite em homologação/remoto                                  | Sexta migração local versus cinco registradas no README; verificar em ambiente separado antes do fluxo real                                                                                                                                          |
+| Alta para recebimento | Falta modelo de identidade do remetente e escopo da caixa                                            | Evitar autorizar por endereço From ou criar usuários/vínculos automaticamente; exige decisão explícita                                                                                                                                               |
+| Média                 | Algumas mensagens de validação chegam em inglês                                                      | `failure` devolve mensagem padrão Zod; enum de prioridade inválida reproduzido localmente: `Invalid option: expected one of ...`; padronizar pt-BR                                                                                                   |
+| Média                 | Desvio de runtime local                                                                              | Node 26.13.1 nesta execução versus Node 24 especificado; reproduzir homologação/CI em Node 24                                                                                                                                                        |
+| Média                 | Documentos históricos misturam pendências resolvidas com estado atual                                | Exemplos: Git antes indisponível, SQL antes não executado e linha do tempo ainda pendente em trechos antigos; consultar evidências datadas e consolidar depois                                                                                       |
+| Média                 | Invalidação de cache não cobre escritas externas, retenção ou futuro worker                          | Se a flag for ativada, consumidores externos precisam do protocolo de invalidação; não foi detectado vazamento entre empresas nesta revisão                                                                                                          |
+| Média                 | Logs de duração não envolvem todas as rotas                                                          | `observeApi` cobre Auth, catch-all e privacidade; empresas, aceite de convite e cookies não têm esse wrapper. Não há evidência de alertas/Sentry ativos                                                                                              |
+| Dependente de volume  | Paginação por offset e lock por organização                                                          | Polling e importação precisam tratar movimentação da fila; sem cursor/watermark e sem teste de carga nesta fase                                                                                                                                      |
 
 Há ainda diferença de validação entre tabela e comando: `tickets.title` aceita 3–160 no CHECK inicial, mas HTTP e `desk_command` exigem 5–160; a regex SQL de slug aceita casos recusados pelo schema HTTP. Escritas normais pelo comando validam título, porém qualquer desenho que opere fora do mesmo contrato deverá enfrentar essas divergências sem contornar as regras existentes.
 

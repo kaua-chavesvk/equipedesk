@@ -15,13 +15,13 @@ erDiagram
 
 Comentários e eventos possuem chave estrangeira composta com empresa e chamado. Remover associação não remove identidade nem histórico. Índices iniciam pela empresa e suportam estado e ordenação estável por data e UUID.
 
-| Capacidade | Solicitante | Atendente | Administrador |
-|---|---|---|---|
-| Abrir chamado | Sim | Sim | Sim |
-| Ler e comentar | Próprios | Fila da empresa | Fila da empresa |
-| Assumir e resolver | Não | Sim | Sim |
-| Reabrir com motivo | Próprios | Fila da empresa | Fila da empresa |
-| Gerenciar equipe e convites | Não | Não | Sim |
+| Capacidade                  | Solicitante | Atendente       | Administrador   |
+| --------------------------- | ----------- | --------------- | --------------- |
+| Abrir chamado               | Sim         | Sim             | Sim             |
+| Ler e comentar              | Próprios    | Fila da empresa | Fila da empresa |
+| Assumir e resolver          | Não         | Sim             | Sim             |
+| Reabrir com motivo          | Próprios    | Fila da empresa | Fila da empresa |
+| Gerenciar equipe e convites | Não         | Não             | Sim             |
 
 RLS protege leitura direta com credenciais de usuário. Escrita acontece por funções transacionais com contexto de autenticação; o cliente não altera empresa, autor, versão ou papel por atualização direta. A função confirma acesso antes de expor existência do recurso. Versão condicional resolve concorrência de atendimento. A empresa é bloqueada durante alterações de membros para serializar a proteção do último administrador.
 
