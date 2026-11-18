@@ -58,7 +58,8 @@ Consulte a resposta de entrega para os comandos efetivamente executados nesta m�
 - [x] Adicionar responsável “Atribuídos a mim” à consulta no banco e na demonstração, preservando RLS.
 - [x] Persistir até dez filtros pessoais por empresa, com controle de versão, Lista/Kanban e suporte pt-BR/en.
 - [x] Cobrir contratos e API com Vitest; acrescentar testes SQL, concorrência pela API de dados e cenário de navegador entre sessões.
-- [ ] Registrar aprovação do novo cenário conectado no CI e aplicar a migração em homologação antes da publicação.
+- [x] Registrar aprovação do novo cenário conectado no CI: execução 44159116041, commit 4f016b8; quatro testes conectados aprovados, incluindo filtros.
+- [ ] Aplicar a migração em homologação e validar antes da publicação.
 - [ ] Indicadores de SLA: dependem dos prazos e regras por prioridade, ainda não definidos.
 - [ ] Ações em lote e central de notificações: próximas entregas independentes.
 
