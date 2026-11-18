@@ -16,7 +16,11 @@ export function LanguageSelect() {
   const locale = useLocale();
   const preferences = useContext(AccountAppearance);
   const [busy, setBusy] = useState(false);
-  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
   const router = useRouter();
 
   async function change(value: Locale) {
@@ -24,7 +28,8 @@ export function LanguageSelect() {
     try {
       if (preferences) {
         const response = await fetch('/api/conta/preferencias', {
-          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ patch: { locale: value }, version: preferences.version }),
         });
         if (!response.ok) throw new Error();
@@ -32,15 +37,28 @@ export function LanguageSelect() {
       rememberLocale(value);
       router.refresh();
     } catch {
-      toast.error(locale === 'en' ? 'Could not change the language. Reload and try again.' : 'Não foi possível alterar o idioma. Recarregue e tente novamente.');
+      toast.error(
+        locale === 'en'
+          ? 'Could not change the language. Reload and try again.'
+          : 'Não foi possível alterar o idioma. Recarregue e tente novamente.',
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  return <label className="theme-select">{locale === 'en' ? 'Language' : 'Idioma'}
-    <select aria-label={locale === 'en' ? 'Language' : 'Idioma'} value={locale} disabled={busy || !mounted} onChange={event => void change(event.target.value as Locale)}>
-      <option value="pt-BR">Português do Brasil</option><option value="en">English</option>
-    </select>
-  </label>;
+  return (
+    <label className="theme-select">
+      {locale === 'en' ? 'Language' : 'Idioma'}
+      <select
+        aria-label={locale === 'en' ? 'Language' : 'Idioma'}
+        value={locale}
+        disabled={busy || !mounted}
+        onChange={(event) => void change(event.target.value as Locale)}
+      >
+        <option value="pt-BR">Português do Brasil</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+  );
 }

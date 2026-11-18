@@ -23,6 +23,10 @@ it.each([
 
 it('aceita AAL2 validado para o mesmo administrador', async () => {
   vi.stubEnv('ENFORCE_PLATFORM_ADMIN_AAL2', 'true');
-  const auth = { getClaims: vi.fn().mockResolvedValue({ data: { claims: { sub: 'admin', aal: 'aal2' } }, error: null }) };
+  const auth = {
+    getClaims: vi
+      .fn()
+      .mockResolvedValue({ data: { claims: { sub: 'admin', aal: 'aal2' } }, error: null }),
+  };
   await expect(hasAdminAssurance(auth, 'admin')).resolves.toBe(true);
 });

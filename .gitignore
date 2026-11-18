@@ -10,3 +10,5 @@ supabase/.temp/
 /notas fer/
 .env*
 !.env.example
+
+artifacts/recording-temp/

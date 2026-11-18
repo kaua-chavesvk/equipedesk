@@ -11,7 +11,7 @@ export async function hasAdminAssurance(auth: ServerAuth, userId: string) {
 }
 
 export async function requireAdminAssurance(auth: ServerAuth, userId: string) {
-  if (!await hasAdminAssurance(auth, userId)) {
+  if (!(await hasAdminAssurance(auth, userId))) {
     throw new HttpError(403, 'Confirme o segundo fator para acessar a administração.');
   }
 }

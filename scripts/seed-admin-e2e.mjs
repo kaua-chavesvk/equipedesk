@@ -10,12 +10,14 @@ assert.ok(['localhost', '127.0.0.1'].includes(new URL(url).hostname));
 const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 const { data, error } = await db.auth.admin.listUsers();
 if (error) throw new Error('Falha ao localizar a conta de teste.');
-const marina = data.users.find(user => user.email === 'marina@aurora.example');
+const marina = data.users.find((user) => user.email === 'marina@aurora.example');
 if (!marina) throw new Error('Execute o seed local antes do teste de administração.');
 
 const { error: updateError } = await db.auth.admin.updateUserById(marina.id, { password });
 if (updateError) throw new Error('Falha ao preparar a senha de teste.');
-const { error: cleanupError } = await db.from('privacy_requests').delete()
+const { error: cleanupError } = await db
+  .from('privacy_requests')
+  .delete()
   .eq('user_id', marina.id)
   .eq('kind', 'access')
   .eq('details', 'Pedido para verificar autorização de resposta.');
@@ -23,9 +25,13 @@ if (cleanupError) throw new Error('Falha ao limpar os pedidos da conta de teste.
 
 // Synthetic platform administrator, restricted to the disposable local Auth service.
 const adminEmail = 'mfa-admin@security.example';
-let admin = data.users.find(user => user.email === adminEmail);
+let admin = data.users.find((user) => user.email === adminEmail);
 if (!admin) {
-  const created = await db.auth.admin.createUser({ email: adminEmail, password, email_confirm: true });
+  const created = await db.auth.admin.createUser({
+    email: adminEmail,
+    password,
+    email_confirm: true,
+  });
   if (created.error) throw new Error('Falha ao criar administrador sintético.');
   admin = created.data.user;
 } else {

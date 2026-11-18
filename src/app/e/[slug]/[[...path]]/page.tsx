@@ -2,6 +2,55 @@ import { accountPreferences, accountScope } from '@/lib/server/account-settings'
 import { queueInput, queryTickets, ticketCounts, ticketById } from '@/lib/ticket-queries';
 import { getWorkspace } from '@/lib/data';
 import { Workspace } from '@/components/workspace';
-import { redirect,notFound } from 'next/navigation';
-export const dynamic='force-dynamic';
-export default async function Page({params,searchParams}:{params:Promise<{slug:string,path?:string[]}>;searchParams:Promise<Record<string,string|string[]|undefined>>}){const {slug,path}=await params;let data;try{data=await getWorkspace(slug);if(path?.[0]==='equipe'&&data.organization.role!=='admin')notFound();const raw=await searchParams;const parsed=queueInput.safeParse(raw);const query=parsed.success?parsed.data:queueInput.parse({});const id=path?.[0]==='chamados'&&path[1]&&path[1]!=='novo'?path[1]:null;const list=!id&&path?.[0]!=='equipe'&&path?.[1]!=='novo';const [queue,counts]=await Promise.all([list?queryTickets(data,query):Promise.resolve({data:[],total:0,page:query.page,pageSize:query.pageSize}),ticketCounts(data)]);const ticket=id?await ticketById(data,id):null;const preferences=await accountPreferences().catch(()=>null);const scope=preferences?await accountScope():null;const previous=scope?await scope.db.from('user_workspace_preferences').select('version,last_view,last_queue_view').eq('user_id',scope.user.id).eq('organization_id',data.organization.id).maybeSingle():null;data={...data,viewPreference:previous?.data,queueView:raw.view==='kanban'||raw.view==='list'?raw.view:preferences?.queue_view,tickets:id?(ticket?[ticket]:[]):queue.data,queue:{total:queue.total,page:queue.page,pageSize:queue.pageSize},counts,query};}catch(error){if(error instanceof Error&&error.message==='Sessão ausente.')redirect('/login');if(error instanceof Error&&error.message==='Empresa não encontrada.')notFound();throw error;}return <Workspace key={`${slug}/${path?.join('/')??''}`} data={data} path={path??[]}/>;}
+import { redirect, notFound } from 'next/navigation';
+export const dynamic = 'force-dynamic';
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string; path?: string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { slug, path } = await params;
+  let data;
+  try {
+    data = await getWorkspace(slug);
+    if (path?.[0] === 'equipe' && data.organization.role !== 'admin') notFound();
+    const raw = await searchParams;
+    const parsed = queueInput.safeParse(raw);
+    const query = parsed.success ? parsed.data : queueInput.parse({});
+    const id = path?.[0] === 'chamados' && path[1] && path[1] !== 'novo' ? path[1] : null;
+    const list = !id && path?.[0] !== 'equipe' && path?.[1] !== 'novo';
+    const [queue, counts] = await Promise.all([
+      list
+        ? queryTickets(data, query)
+        : Promise.resolve({ data: [], total: 0, page: query.page, pageSize: query.pageSize }),
+      ticketCounts(data),
+    ]);
+    const ticket = id ? await ticketById(data, id) : null;
+    const preferences = await accountPreferences().catch(() => null);
+    const scope = preferences ? await accountScope() : null;
+    const previous = scope
+      ? await scope.db
+          .from('user_workspace_preferences')
+          .select('version,last_view,last_queue_view')
+          .eq('user_id', scope.user.id)
+          .eq('organization_id', data.organization.id)
+          .maybeSingle()
+      : null;
+    data = {
+      ...data,
+      viewPreference: previous?.data,
+      queueView: raw.view === 'kanban' || raw.view === 'list' ? raw.view : preferences?.queue_view,
+      tickets: id ? (ticket ? [ticket] : []) : queue.data,
+      queue: { total: queue.total, page: queue.page, pageSize: queue.pageSize },
+      counts,
+      query,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Sessão ausente.') redirect('/login');
+    if (error instanceof Error && error.message === 'Empresa não encontrada.') notFound();
+    throw error;
+  }
+  return <Workspace key={`${slug}/${path?.join('/') ?? ''}`} data={data} path={path ?? []} />;
+}

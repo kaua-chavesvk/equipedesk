@@ -13,7 +13,10 @@ vi.mock('@/lib/data', () => ({
 }));
 vi.mock('@/lib/supabase/server', () => ({ supabaseServer: async () => ({ from: mocks.from }) }));
 
-vi.mock('@/lib/ticket-queries', () => ({ ticketById: async (workspace: {tickets: {id:string}[]}, id:string) => workspace.tickets.find(t=>t.id===id) }));
+vi.mock('@/lib/ticket-queries', () => ({
+  ticketById: async (workspace: { tickets: { id: string }[] }, id: string) =>
+    workspace.tickets.find((t) => t.id === id),
+}));
 
 import { GET } from '../../src/app/api/empresas/[slug]/[[...resource]]/route';
 
@@ -28,26 +31,46 @@ describe('falhas no carregamento da conversa', () => {
     });
   });
 
-  it.each(['comments', 'ticket_events'])('retorna 500 quando a consulta %s falha', async failingTable => {
-    mocks.from.mockImplementation((table: string) => ({
-      select: () => ({ eq: () => ({ eq: () => ({ order: async () => table === failingTable
-        ? { data: null, error: { message: 'Falha interna confidencial' } }
-        : { data: [], error: null } }) }) }),
-    }));
-    const response = await GET(new Request(`http://localhost/api/empresas/aurora/chamados/${ticketId}`), {
-      params: Promise.resolve({ slug: 'aurora', resource: ['chamados', ticketId] }),
-    });
-    expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({ error: 'Não foi possível concluir a operação. Tente novamente.' });
-  });
+  it.each(['comments', 'ticket_events'])(
+    'retorna 500 quando a consulta %s falha',
+    async (failingTable) => {
+      mocks.from.mockImplementation((table: string) => ({
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              order: async () =>
+                table === failingTable
+                  ? { data: null, error: { message: 'Falha interna confidencial' } }
+                  : { data: [], error: null },
+            }),
+          }),
+        }),
+      }));
+      const response = await GET(
+        new Request(`http://localhost/api/empresas/aurora/chamados/${ticketId}`),
+        {
+          params: Promise.resolve({ slug: 'aurora', resource: ['chamados', ticketId] }),
+        },
+      );
+      expect(response.status).toBe(500);
+      expect(await response.json()).toEqual({
+        error: 'Não foi possível concluir a operação. Tente novamente.',
+      });
+    },
+  );
 
   it('preserva conversa realmente vazia como sucesso', async () => {
     mocks.from.mockImplementation(() => ({
-      select: () => ({ eq: () => ({ eq: () => ({ order: async () => ({ data: [], error: null }) }) }) }),
+      select: () => ({
+        eq: () => ({ eq: () => ({ order: async () => ({ data: [], error: null }) }) }),
+      }),
     }));
-    const response = await GET(new Request(`http://localhost/api/empresas/aurora/chamados/${ticketId}`), {
-      params: Promise.resolve({ slug: 'aurora', resource: ['chamados', ticketId] }),
-    });
+    const response = await GET(
+      new Request(`http://localhost/api/empresas/aurora/chamados/${ticketId}`),
+      {
+        params: Promise.resolve({ slug: 'aurora', resource: ['chamados', ticketId] }),
+      },
+    );
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ticket: { id: ticketId }, comments: [], events: [] });
   });

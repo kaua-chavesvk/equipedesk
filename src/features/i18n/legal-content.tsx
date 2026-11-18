@@ -6,7 +6,7 @@ import { translator, type Locale } from './translate';
 export function translateLegalContent(content: ReactNode, locale: Locale): ReactNode {
   if (locale === 'pt-BR') return content;
   const t = translator(locale);
-  return Children.map(content, child => {
+  return Children.map(content, (child) => {
     if (typeof child === 'string') return t(child);
     if (!isValidElement<{ children?: ReactNode }>(child)) return child;
     return cloneElement(child, {}, translateLegalContent(child.props.children, locale));

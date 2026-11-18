@@ -16,51 +16,141 @@ let socketAuthEnabled = false;
 
 function docker(args, input) {
   return execFileSync('docker', args, {
-    input, encoding: 'utf8', timeout: 120_000, maxBuffer: 1024 * 1024,
+    input,
+    encoding: 'utf8',
+    timeout: 120_000,
+    maxBuffer: 1024 * 1024,
     stdio: ['pipe', 'pipe', 'pipe'],
   });
 }
 
 function sql(target, statement) {
-  return docker(['exec', '-i', container, 'psql', '-X', '-U', 'supabase_admin', '-d', target,
-    '-v', 'ON_ERROR_STOP=1', '-At'], statement).trim();
+  return docker(
+    [
+      'exec',
+      '-i',
+      container,
+      'psql',
+      '-X',
+      '-U',
+      'supabase_admin',
+      '-d',
+      target,
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-At',
+    ],
+    statement,
+  ).trim();
 }
 
-const tables = ['auth.users', 'public.organizations', 'public.memberships', 'public.tickets',
-  'public.comments', 'public.ticket_events', 'public.profiles', 'public.user_preferences', 'public.user_ticket_filters'];
-const fingerprint = tables.map(table =>
-  `select '${table}', count(*), md5(coalesce(string_agg(row_to_json(item)::text, E'\n' order by row_to_json(item)::text), '')) from ${table} item;`,
-).join('\n');
+const tables = [
+  'auth.users',
+  'public.organizations',
+  'public.memberships',
+  'public.tickets',
+  'public.comments',
+  'public.ticket_events',
+  'public.profiles',
+  'public.user_preferences',
+  'public.user_ticket_filters',
+];
+const fingerprint = tables
+  .map(
+    (table) =>
+      `select '${table}', count(*), md5(coalesce(string_agg(row_to_json(item)::text, E'\n' order by row_to_json(item)::text), '')) from ${table} item;`,
+  )
+  .join('\n');
 
 try {
   // The built-in roles own objects across several schemas. Restore using the
   // local system role and limit its temporary login to the container socket.
-  const hba = docker(['exec', container, 'psql', '-X', '-U', 'postgres', '-d', 'postgres',
-    '-Atc', 'show hba_file']).trim();
+  const hba = docker([
+    'exec',
+    container,
+    'psql',
+    '-X',
+    '-U',
+    'postgres',
+    '-d',
+    'postgres',
+    '-Atc',
+    'show hba_file',
+  ]).trim();
   assert.match(hba, /^\/[\w/.-]+$/);
   docker(['exec', '-u', 'postgres', container, 'cp', '-p', '--', hba, hbaBackup]);
   socketAuthEnabled = true;
   try {
-    docker(['exec', '-u', 'postgres', container, 'sh', '-ec',
+    docker([
+      'exec',
+      '-u',
+      'postgres',
+      container,
+      'sh',
+      '-ec',
       'printf "%s\\n" "local all supabase_admin trust" | cat - "$2" > "$1"; pg_ctl -D "$PGDATA" reload',
-      'restore-test', hba, hbaBackup]);
-  const source = sql('postgres', fingerprint);
-  assert.equal(sql('postgres', 'select count(*) >= 4 from auth.users;'), 't', 'Prepare o seed local.');
-  docker(['exec', container, 'pg_dump', '-U', 'supabase_admin', '-d', 'postgres', '-Fc', '-f', archive]);
-  // pg_graphql creates its public wrapper through Supabase's extension hooks.
-  // A bare database has no wrapper to receive the source wrapper's ACL.
-  const entries = docker(['exec', container, 'pg_restore', '--list', archive]);
-  const portableEntries = entries.split('\n').filter(line =>
-    !/^\d+; \d+ \d+ ACL graphql_public FUNCTION graphql\(/.test(line),
-  ).join('\n');
-  docker(['exec', '-i', container, 'sh', '-ec', 'cat > "$1"', 'restore-test', restoreList], portableEntries);
-  docker(['exec', container, 'createdb', '-U', 'supabase_admin', '--template=template0', database]);
-  created = true;
-  docker(['exec', container, 'pg_restore', '-U', 'supabase_admin', '-d', database,
-    '--exit-on-error', '--single-transaction', '--use-list', restoreList, archive]);
-  assert.equal(sql(database, fingerprint), source, 'Dados restaurados divergem da origem.');
+      'restore-test',
+      hba,
+      hbaBackup,
+    ]);
+    const source = sql('postgres', fingerprint);
+    assert.equal(
+      sql('postgres', 'select count(*) >= 4 from auth.users;'),
+      't',
+      'Prepare o seed local.',
+    );
+    docker([
+      'exec',
+      container,
+      'pg_dump',
+      '-U',
+      'supabase_admin',
+      '-d',
+      'postgres',
+      '-Fc',
+      '-f',
+      archive,
+    ]);
+    // pg_graphql creates its public wrapper through Supabase's extension hooks.
+    // A bare database has no wrapper to receive the source wrapper's ACL.
+    const entries = docker(['exec', container, 'pg_restore', '--list', archive]);
+    const portableEntries = entries
+      .split('\n')
+      .filter((line) => !/^\d+; \d+ \d+ ACL graphql_public FUNCTION graphql\(/.test(line))
+      .join('\n');
+    docker(
+      ['exec', '-i', container, 'sh', '-ec', 'cat > "$1"', 'restore-test', restoreList],
+      portableEntries,
+    );
+    docker([
+      'exec',
+      container,
+      'createdb',
+      '-U',
+      'supabase_admin',
+      '--template=template0',
+      database,
+    ]);
+    created = true;
+    docker([
+      'exec',
+      container,
+      'pg_restore',
+      '-U',
+      'supabase_admin',
+      '-d',
+      database,
+      '--exit-on-error',
+      '--single-transaction',
+      '--use-list',
+      restoreList,
+      archive,
+    ]);
+    assert.equal(sql(database, fingerprint), source, 'Dados restaurados divergem da origem.');
 
-  sql(database, `
+    sql(
+      database,
+      `
     begin;
     do $$
     begin
@@ -93,15 +183,28 @@ try {
       end;
     end $$;
     rollback;
-  `);
-    console.log('Backup restaurado em banco descartável. Dados, RLS e bloqueio de escrita direta conferidos.');
+  `,
+    );
+    console.log(
+      'Backup restaurado em banco descartável. Dados, RLS e bloqueio de escrita direta conferidos.',
+    );
   } finally {
     try {
-      if (created) docker(['exec', container, 'dropdb', '-U', 'supabase_admin', '--force', database]);
+      if (created)
+        docker(['exec', container, 'dropdb', '-U', 'supabase_admin', '--force', database]);
     } finally {
-      docker(['exec', '-u', 'postgres', container, 'sh', '-ec',
+      docker([
+        'exec',
+        '-u',
+        'postgres',
+        container,
+        'sh',
+        '-ec',
         'cp -p -- "$2" "$1"; pg_ctl -D "$PGDATA" reload; rm -f -- "$2"',
-        'restore-test', hba, hbaBackup]);
+        'restore-test',
+        hba,
+        hbaBackup,
+      ]);
     }
   }
 } finally {

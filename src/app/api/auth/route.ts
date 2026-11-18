@@ -12,7 +12,10 @@ async function handlePOST(request: Request) {
   try {
     const input = authInput.parse(await readJson(request));
     if (input.action === 'demo') {
-      if (configured() || process.env.NODE_ENV === 'production' && process.env.DEMO_MODE !== 'true') {
+      if (
+        configured() ||
+        (process.env.NODE_ENV === 'production' && process.env.DEMO_MODE !== 'true')
+      ) {
         throw new HttpError(403, 'Demonstração desativada.');
       }
       await initializeDemo();
@@ -33,7 +36,10 @@ async function handlePOST(request: Request) {
         }));
         break;
       case 'update_password': {
-        const {data:{user}}=await db.auth.getUser();if(!user)throw new HttpError(401,'Sessão ausente.');
+        const {
+          data: { user },
+        } = await db.auth.getUser();
+        if (!user) throw new HttpError(401, 'Sessão ausente.');
         ({ error } = await db.auth.updateUser({ password: input.password }));
         break;
       }
@@ -41,28 +47,56 @@ async function handlePOST(request: Request) {
         ({ error } = await db.auth.signUp({
           email: input.email,
           password: input.password,
-          options: { data: { name: input.name,legal_terms_accepted:input.termsAccepted,legal_adult_confirmed:input.adultConfirmed,legal_terms_version:input.termsVersion,legal_privacy_version:input.privacyVersion,marketing_consent:input.marketingConsent }, emailRedirectTo: `${origin}/callback` },
+          options: {
+            data: {
+              name: input.name,
+              legal_terms_accepted: input.termsAccepted,
+              legal_adult_confirmed: input.adultConfirmed,
+              legal_terms_version: input.termsVersion,
+              legal_privacy_version: input.privacyVersion,
+              marketing_consent: input.marketingConsent,
+            },
+            emailRedirectTo: `${origin}/callback`,
+          },
         }));
         break;
       case 'login':
         {
           let allowed: boolean;
-          try { allowed = await rateLimitLogin(request, input.email); }
-          catch { throw new HttpError(503, 'Serviço temporariamente indisponível.'); }
-          if (!allowed) return NextResponse.json({ error: 'Muitas requisições. Aguarde um minuto.' }, {
-            status: 429, headers: { 'Retry-After': '60' },
-          });
+          try {
+            allowed = await rateLimitLogin(request, input.email);
+          } catch {
+            throw new HttpError(503, 'Serviço temporariamente indisponível.');
+          }
+          if (!allowed)
+            return NextResponse.json(
+              { error: 'Muitas requisições. Aguarde um minuto.' },
+              {
+                status: 429,
+                headers: { 'Retry-After': '60' },
+              },
+            );
         }
-        ({ error } = await db.auth.signInWithPassword({ email: input.email, password: input.password }));
+        ({ error } = await db.auth.signInWithPassword({
+          email: input.email,
+          password: input.password,
+        }));
         break;
     }
-    if(error)securityEvent('auth_failed',422,request.headers.get('x-request-id')??undefined);
-    if (error && input.action !== 'recover') throw new HttpError(422, 'Não foi possível autenticar. Confira seus dados e a confirmação do e-mail.');
+    if (error) securityEvent('auth_failed', 422, request.headers.get('x-request-id') ?? undefined);
+    if (error && input.action !== 'recover')
+      throw new HttpError(
+        422,
+        'Não foi possível autenticar. Confira seus dados e a confirmação do e-mail.',
+      );
     return NextResponse.json({
       redirect: input.action === 'logout' ? '/login' : '/onboarding',
-      message: input.action === 'recover'
-        ? 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.'
-        : input.action === 'signup' ? 'Confira seu e-mail para confirmar o cadastro.' : undefined,
+      message:
+        input.action === 'recover'
+          ? 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.'
+          : input.action === 'signup'
+            ? 'Confira seu e-mail para confirmar o cadastro.'
+            : undefined,
     });
   } catch (error) {
     return failure(error);

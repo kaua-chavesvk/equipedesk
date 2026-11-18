@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { rateLimit, rateLimitLogin } from '../../src/lib/rate-limit';
 import { requestProtocol, trustedClientIp } from '../../src/lib/security';
 
-const makeRequest = (headers?: HeadersInit) => new Request('https://desk.example/api/auth', { headers });
+const makeRequest = (headers?: HeadersInit) =>
+  new Request('https://desk.example/api/auth', { headers });
 const fetchRedis = vi.fn<typeof fetch>();
 
 beforeEach(() => {
@@ -21,7 +22,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const keys = () => fetchRedis.mock.calls.map(([, options]) => JSON.parse(String(options?.body))[3] as string);
+const keys = () =>
+  fetchRedis.mock.calls.map(([, options]) => JSON.parse(String(options?.body))[3] as string);
 
 describe('ingresso e limite de autenticação', () => {
   it('aceita o IP único da Vercel e ignora listas e cabeçalhos sem ingresso confiável', () => {
@@ -64,7 +66,12 @@ describe('ingresso e limite de autenticação', () => {
     await rateLimitLogin(request, 'pessoa@example.test');
     await rateLimitLogin(request, 'outra@example.test');
     fetchRedis.mockResolvedValueOnce(Response.json({ result: 11 }));
-    expect(await rateLimitLogin(makeRequest({ 'x-vercel-forwarded-for': '192.0.2.9' }), 'pessoa@example.test')).toBe(false);
+    expect(
+      await rateLimitLogin(
+        makeRequest({ 'x-vercel-forwarded-for': '192.0.2.9' }),
+        'pessoa@example.test',
+      ),
+    ).toBe(false);
     const [first, normalized, otherEmail, otherIp] = keys();
     expect(first).toMatch(/^equipedesk:login:[a-f0-9]{64}$/);
     expect(first).toBe(normalized);

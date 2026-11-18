@@ -8,17 +8,22 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 function accept() {
-  return POST(new Request('https://desk.example/api/convites/aceitar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: 'a'.repeat(64) }),
-  }));
+  return POST(
+    new Request('https://desk.example/api/convites/aceitar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: 'a'.repeat(64) }),
+    }),
+  );
 }
 
 beforeEach(() => vi.resetAllMocks());
 
 it('orienta a entrar na conta antes de chamar o comando de aceite', async () => {
-  mocks.getUser.mockResolvedValue({ data: { user: null }, error: { name: 'AuthSessionMissingError' } });
+  mocks.getUser.mockResolvedValue({
+    data: { user: null },
+    error: { name: 'AuthSessionMissingError' },
+  });
   const response = await accept();
   expect(response.status).toBe(401);
   expect((await response.json()).error).toContain('Entre com o e-mail');
@@ -27,7 +32,9 @@ it('orienta a entrar na conta antes de chamar o comando de aceite', async () => 
 
 it('preserva a recusa por e-mail diferente', async () => {
   mocks.getUser.mockResolvedValue({ data: { user: { id: 'test-user' } }, error: null });
-  mocks.rpc.mockResolvedValue({ error: { code: 'P0001', message: '403:Confirme o e-mail correspondente ao convite.' } });
+  mocks.rpc.mockResolvedValue({
+    error: { code: 'P0001', message: '403:Confirme o e-mail correspondente ao convite.' },
+  });
   const response = await accept();
   expect(response.status).toBe(403);
   expect((await response.json()).error).toBe('Confirme o e-mail correspondente ao convite.');
