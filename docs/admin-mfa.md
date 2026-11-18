@@ -46,3 +46,36 @@ O segundo cenário passou, mas usou o access token da própria conta sintética,
 JWTs já emitidos podem continuar válidos até expirar em verificações locais ou serviços que não consultam a sessão. O resultado de `getUser` neste ensaio não prova revogação universal de acesso direto ao banco. Referência: https://supabase.com/docs/guides/auth/signout.
 
 A exigência global permanece desativada enquanto essa etapa operacional não estiver validada. Não houve alteração de RLS, migração, dependência ou configuração de produção.
+
+## Revogação por usuário validada — 18/11/2026
+
+O ensaio seguinte resolveu a dependência do token do titular: em uma conta sintética de homologação, duas sessões distintas foram abertas. Um processo CLI administrativo isolado removeu somente as linhas de `auth.sessions` daquele UUID, depois de conferir também o e-mail sintético. As duas sessões foram recusadas em `refreshSession` e `getUser`; novo login permaneceu permitido. A conta foi removida e sua ausência conferida ao final. Nenhum usuário real foi afetado.
+
+Procedimento para operador autorizado, após verificação de identidade:
+
+1. Conferir projeto, UUID e e-mail da conta; registrar a solicitação sem credenciais. Para impedir novo login durante a intervenção, coordenar uma janela com o titular ou aplicar contenção administrativa apropriada ao incidente.
+2. Pelo SQL Editor/CLI administrativo do projeto correto, executar em transação a remoção de sessões limitada ao UUID, com conferência de identidade antes da escrita. Não criar RPC pública nem conceder acesso do processo web ao schema Auth.
+3. Remover somente o fator perdido pela API administrativa de MFA ou painel. Revogar novamente as sessões ao concluir, para encerrar qualquer sessão aberta durante a intervenção.
+4. Solicitar novo login e cadastro de autenticador, mantendo a exigência de AAL2 nas operações administrativas. Não pedir senha, token ou segredo TOTP ao titular.
+5. Confirmar novo AAL2 e registrar o resultado. Em incidente com comprometimento, avaliar também troca de senha e a janela de validade dos JWTs anteriores.
+
+Exemplo de operação administrativa manual (substituir ambos os valores somente após conferência; não executar como migração):
+
+```sql
+begin;
+do $$
+begin
+  if not exists (
+    select 1 from auth.users
+    where id = 'UUID_CONFERIDO'::uuid and email = 'EMAIL_CONFERIDO'
+  ) then
+    raise exception 'Identidade não confere';
+  end if;
+end $$;
+delete from auth.sessions where user_id = 'UUID_CONFERIDO'::uuid;
+commit;
+```
+
+Esse comando altera dados de sessão administrados pelo provedor e deve permanecer uma operação excepcional, executada por operador autorizado. Não altera funções, grants ou RLS. A validade criptográfica de JWTs anteriores permanece até expiração; não extrapolar o resultado de `getUser` para acessos diretos ao banco. Revalidar o procedimento após mudanças relevantes do Supabase Auth.
+
+Status: recuperação técnica ensaiada com contas sintéticas; fator da conta real preservado. A ativação da flag e os testes HTTP com AAL1/AAL2 ainda são uma etapa separada. O titular deve manter acesso administrativo ao projeto Supabase para executar a recuperação quando necessário.
