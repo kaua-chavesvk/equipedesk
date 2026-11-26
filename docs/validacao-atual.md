@@ -20,3 +20,11 @@ O build final (`pnpm build`) concluiu compilação, TypeScript, geração de pá
 Contagens em relatórios antigos pertencem às respectivas execuções. Este documento centraliza o resultado vigente; não alterar evidências históricas para simular que testes novos existiam antes.
 
 A gravação `artifacts/equipedesk-demo.webm` tem 177,96 segundos, resolução 1280 × 800, e usa a demonstração local e legendas técnicas. Não contém conta real nem configuração de MFA. Não houve deploy nesta revisão.
+
+## Revisão de portfólio — 26/11/2026
+
+Instalação com lockfile, lint, tipos e 178 testes unitários em 23 arquivos aprovados na nova cópia local. A verificação legal passou após normalização de finais de linha no Windows; conteúdo protegido preservado. Actions foram resolvidas via tags oficiais para SHA completo. MIT escolhida pelo titular. GIF de três quadros extraído do vídeo demonstrativo existente; captura desktop refeita sem aviso sobreposto e sem sublinhado permanente. A revisão da faixa lateral usa fundo de documento para a captura completa.
+
+Demo pública: projeto separado criado, aguardando configuração Redis no painel; não anunciada como disponível. Esta revisão não foi publicada no site oficial.
+
+Build local desta revisão concluído com sucesso. Alteração final de fundo lateral é apenas CSS. A suíte E2E completa não foi repetida nesta revisão; as falhas antigas continuam registradas.

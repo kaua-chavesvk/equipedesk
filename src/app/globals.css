@@ -2954,3 +2954,21 @@ html.dark[data-contrast='high'],
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Paint the desktop rail for the full document, including full-page captures. */
+@media (min-width: 761px) {
+  body:has(.app-shell) {
+    background: linear-gradient(
+      to right,
+      var(--surface) 0 var(--sidebar-width),
+      var(--canvas) var(--sidebar-width) 100%
+    );
+  }
+}
+.board-card a {
+  text-decoration: none;
+}
+.board-card a:hover,
+.board-card a:focus-visible {
+  text-decoration: underline;
+}

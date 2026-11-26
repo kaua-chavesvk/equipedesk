@@ -22,6 +22,8 @@ function Notifications() {
       position="bottom-right"
       closeButton
       richColors
+      duration={3000}
+      visibleToasts={1}
       offset={{ bottom: '24px', right: '24px' }}
       mobileOffset={{
         bottom: 'calc(84px + env(safe-area-inset-bottom))',

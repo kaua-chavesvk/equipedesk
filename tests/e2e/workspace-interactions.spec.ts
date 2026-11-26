@@ -74,7 +74,7 @@ test('tema escuro persiste e a navegação inferior funciona no celular', async 
   await expect(page.getByRole('heading', { name: 'Chamados', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.screenshot({ path: 'artifacts/workspace-dark-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'docs/capturas/painel-escuro-celular.png', fullPage: true });
 });
 
 test('arrastar move o chamado com o mesmo controle de versão da ação por botão', async ({
@@ -106,5 +106,5 @@ test('arrastar move o chamado com o mesmo controle de versão da ação por bot�
   await expect(progress.getByRole('link', { name: title })).toBeVisible();
   await page.getByLabel('Tema', { exact: true }).selectOption('dark');
   await expect(page.locator('html')).toHaveClass(/dark/);
-  await page.screenshot({ path: 'artifacts/workspace-kanban-dark-desktop.png', fullPage: true });
+  await page.screenshot({ path: 'docs/capturas/kanban-escuro-desktop.png', fullPage: true });
 });

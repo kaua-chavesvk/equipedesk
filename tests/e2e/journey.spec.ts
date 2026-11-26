@@ -12,7 +12,7 @@ test('abre, comenta, assume, resolve e reabre um chamado', async ({ page }, test
   await page.goto('/e/aurora');
   await expect(page.getByRole('heading', { name: /Olá, Marina/ })).toBeVisible();
   await page.screenshot({
-    path: `artifacts/dashboard-${testInfo.project.name}.png`,
+    path: `docs/capturas/dashboard-${testInfo.project.name}.png`,
     fullPage: true,
     caret: 'initial',
   });

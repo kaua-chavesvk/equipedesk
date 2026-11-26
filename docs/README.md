@@ -11,3 +11,6 @@
 - [Apresentação do projeto](apresentacao.md)
 
 Relatórios com datas descrevem execuções específicas. Eles não substituem a validação atual nem comprovam publicação em produção.
+
+- [Estudo de caso preservado](estudo-de-caso.md)
+- [Changelog](../CHANGELOG.md)

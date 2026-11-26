@@ -1,15 +1,19 @@
 # EquipeDesk
 
+[![CI](https://github.com/kaua-chavesvk/equipedesk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kaua-chavesvk/equipedesk/actions/workflows/ci.yml) · [MIT](LICENSE)
+
 [English](README.en.md)
 
 EquipeDesk organiza o atendimento interno de equipes em espaços de trabalho isolados: cada solicitação tem responsável, prioridade e histórico, desde a abertura até a resolução. A interface funciona em português e inglês, no computador e no celular, com fila em lista ou Kanban.
 
-![Kanban no desktop com dados fictícios](artifacts/workspace-kanban-dark-desktop.png)
+![Fluxo de atendimento com dados fictícios](docs/capturas/fluxo-chamado.gif)
+
+![Kanban no desktop com dados fictícios](docs/capturas/kanban-escuro-desktop.png)
 
 <details>
 <summary>Veja a interface no celular</summary>
 
-<img src="artifacts/workspace-dark-mobile.png" width="360" alt="EquipeDesk no celular, com dados fictícios" />
+<img src="docs/capturas/painel-escuro-celular.png" width="360" alt="EquipeDesk no celular, com dados fictícios" />
 
 </details>
 
@@ -76,3 +80,5 @@ Os resultados atuais e seus limites ficam em [validação](docs/validacao-atual.
 - Evoluir ações em lote, notificações e indicadores de SLA com regras de prazo explícitas.
 
 [Documentação técnica](docs/README.md) · [Histórico](docs/historico.md) · [Roteiro para apresentação de 2–3 minutos](docs/apresentacao.md)
+
+[Changelog](CHANGELOG.md) · [MIT](LICENSE)

@@ -1,14 +1,18 @@
 # EquipeDesk
 
+[![CI](https://github.com/kaua-chavesvk/equipedesk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kaua-chavesvk/equipedesk/actions/workflows/ci.yml) · [MIT](LICENSE)
+
 [Português do Brasil](README.md)
 
 EquipeDesk organizes internal support into isolated workspaces. Teams can assign, prioritize and track requests through a list or Kanban board, with an audit trail and an interface available in Brazilian Portuguese and English on desktop and mobile.
 
-![Desktop Kanban with fictional data](artifacts/workspace-kanban-dark-desktop.png)
+![Fluxo de atendimento com dados fictícios](docs/capturas/fluxo-chamado.gif)
+
+![Desktop Kanban with fictional data](docs/capturas/kanban-escuro-desktop.png)
 
 <details><summary>Mobile interface</summary>
 
-<img src="artifacts/workspace-dark-mobile.png" width="360" alt="Mobile interface with fictional data" />
+<img src="docs/capturas/painel-escuro-celular.png" width="360" alt="Mobile interface with fictional data" />
 
 </details>
 
@@ -64,3 +68,5 @@ flowchart LR
 [Verification and limitations](docs/validacao-atual.md) · [Decision guide](docs/decisoes-tecnicas.md) · [Historical records](docs/historico.md)
 
 Next steps: resolve the outstanding dependency advisory, validate transactional email delivery and external alerts, then add bulk actions, notifications and explicit SLA policies. Technical documentation is currently in Portuguese.
+
+[Changelog](CHANGELOG.md) · [MIT](LICENSE)
