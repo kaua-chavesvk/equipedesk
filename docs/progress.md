@@ -1,5 +1,7 @@
 # Melhorias — 12/11/2026
 
+> Totais históricos: os números abaixo pertencem às execuções descritas. Para o resultado vigente, consulte [validação atual](validacao-atual.md).
+
 ## Primeira etapa: convites, validação e falhas de consulta
 
 O aceite de convite abre `/e/{slug}` usando o retorno da API, exibe a mensagem de erro recebida, move o foco para o aviso e permite tentar novamente. Há também um acesso aos espaços de trabalho.
@@ -48,14 +50,14 @@ O [relatório de segurança](security-report.md) registra os 21 itens solicitado
 
 ## Ciclo de correções de 13/11/2026
 
-| Prioridade | Correção no workspace | Regressão |
-|---|---|---|
-| Alta | Páginas e leituras continuam durante falhas do Redis. Escritas continuam bloqueadas e a checagem de publicação exige Redis. | [Proxy e configuração](../tests/unit/security.test.ts) |
-| Alta | Caminhos de retorno passam pela validação de camadas codificadas. | [Redirecionamentos](../tests/unit/security.test.ts) |
-| Alta | Prévia de convite para e-mail confirmado correspondente, com empresa, papel e mensagens por situação. O aceite substitui a entrada de navegação do convite. | [Isolamento e convites no PostgreSQL](../supabase/tests/isolation.test.sql) |
-| Média | Requisições ao Supabase têm limite de oito segundos e preservam o cancelamento do chamador. | [Tempo limite](../tests/unit/supabase-fetch.test.ts) |
-| Média | A conversa intercala comentários com eventos persistidos e elimina a duplicação do registro de comentário. | [Linha do tempo](../tests/unit/conversation-timeline.test.ts) |
-| Média | Acesso com título neutro e rodapé legal sem pedir escolha de cookies opcionais inativos. | [Jornadas do navegador](../tests/e2e/journey.spec.ts) |
+| Prioridade | Correção no workspace                                                                                                                                       | Regressão                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Alta       | Páginas e leituras continuam durante falhas do Redis. Escritas continuam bloqueadas e a checagem de publicação exige Redis.                                 | [Proxy e configuração](../tests/unit/security.test.ts)                      |
+| Alta       | Caminhos de retorno passam pela validação de camadas codificadas.                                                                                           | [Redirecionamentos](../tests/unit/security.test.ts)                         |
+| Alta       | Prévia de convite para e-mail confirmado correspondente, com empresa, papel e mensagens por situação. O aceite substitui a entrada de navegação do convite. | [Isolamento e convites no PostgreSQL](../supabase/tests/isolation.test.sql) |
+| Média      | Requisições ao Supabase têm limite de oito segundos e preservam o cancelamento do chamador.                                                                 | [Tempo limite](../tests/unit/supabase-fetch.test.ts)                        |
+| Média      | A conversa intercala comentários com eventos persistidos e elimina a duplicação do registro de comentário.                                                  | [Linha do tempo](../tests/unit/conversation-timeline.test.ts)               |
+| Média      | Acesso com título neutro e rodapé legal sem pedir escolha de cookies opcionais inativos.                                                                    | [Jornadas do navegador](../tests/e2e/journey.spec.ts)                       |
 
 ### Executado
 

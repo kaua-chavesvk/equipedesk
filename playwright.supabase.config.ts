@@ -1,22 +1,42 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL;
-if (!supabase || !['localhost', '127.0.0.1'].includes(new URL(supabase).hostname)
-    || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || !process.env.DEMO_PASSWORD) {
+if (
+  !supabase ||
+  !['localhost', '127.0.0.1'].includes(new URL(supabase).hostname) ||
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  !process.env.DEMO_PASSWORD
+) {
   throw new Error('Configure URL local, chave pública do Supabase e DEMO_PASSWORD.');
 }
 
 const origin = 'http://127.0.0.1:3107';
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: ['**/admin-access.spec.ts', '**/account-settings.spec.ts'],
+  testMatch: [
+    '**/admin-access.spec.ts',
+    '**/account-settings.spec.ts',
+    '**/admin-mfa.spec.ts',
+    '**/saved-filters.spec.ts',
+  ],
   workers: 1,
   timeout: 60_000,
-  use: { ...devices['Desktop Chrome'], baseURL: origin, trace: 'off', screenshot: 'off', video: 'off' },
+  use: {
+    ...devices['Desktop Chrome'],
+    baseURL: origin,
+    trace: 'off',
+    screenshot: 'off',
+    video: 'off',
+  },
   webServer: {
     command: 'pnpm exec next dev --hostname 127.0.0.1 --port 3107',
     url: origin,
     timeout: 120000,
-    env: { NEXT_PUBLIC_SITE_URL: origin, DEMO_MODE: 'false', SUPABASE_SERVICE_ROLE_KEY: '' },
+    env: {
+      NEXT_PUBLIC_SITE_URL: origin,
+      DEMO_MODE: 'false',
+      SUPABASE_SERVICE_ROLE_KEY: '',
+      ENFORCE_PLATFORM_ADMIN_AAL2: 'true',
+    },
   },
 });

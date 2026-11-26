@@ -10,12 +10,25 @@ export const GET = observeApi('/api/conta/configuracoes', async () => {
     if (!flags.settings) throw new HttpError(404, 'Configurações indisponíveis.');
     const [preferences, profile] = await Promise.all([
       accountPreferences(),
-      db.from('profiles').select('display_name,version,avatar_path,avatar_version').eq('user_id', user.id).single(),
+      db
+        .from('profiles')
+        .select('display_name,version,avatar_path,avatar_version')
+        .eq('user_id', user.id)
+        .single(),
     ]);
-    if (!preferences || profile.error) throw new HttpError(503, 'Não foi possível carregar suas configurações.');
-    return NextResponse.json({ preferences, profile: {
-      display_name: profile.data.display_name, version: profile.data.version,
-      avatar_version: profile.data.avatar_version, hasAvatar: !!profile.data.avatar_path,
-    }, avatars: flags.avatars });
-  } catch (error) { return failure(error); }
+    if (!preferences || profile.error)
+      throw new HttpError(503, 'Não foi possível carregar suas configurações.');
+    return NextResponse.json({
+      preferences,
+      profile: {
+        display_name: profile.data.display_name,
+        version: profile.data.version,
+        avatar_version: profile.data.avatar_version,
+        hasAvatar: !!profile.data.avatar_path,
+      },
+      avatars: flags.avatars,
+    });
+  } catch (error) {
+    return failure(error);
+  }
 });

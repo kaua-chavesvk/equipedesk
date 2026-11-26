@@ -26,7 +26,9 @@ it('separa empresas, usuários, papéis e filtros, e reaproveita a mesma combina
     ['a', 'maria', 'requester', 'abertos'],
     ['a', 'maria', 'admin', 'resolvidos'],
   ]) {
-    expect(await cachedTickets(org, viewer, role, filter, async () => 'outra visão')).toBe('outra visão');
+    expect(await cachedTickets(org, viewer, role, filter, async () => 'outra visão')).toBe(
+      'outra visão',
+    );
   }
 });
 
