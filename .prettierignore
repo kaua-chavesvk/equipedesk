@@ -1,0 +1,20 @@
+node_modules
+.next
+.vercel
+artifacts
+test-results
+playwright-report
+pnpm-lock.yaml
+supabase/migrations
+supabase/tests
+docs/legal
+src/app/termos/page.tsx
+src/app/privacidade/page.tsx
+src/lib/legal.ts
+next-env.d.ts
+notas fer
+
+.env*
+.git
+supabase/.temp
+.tools

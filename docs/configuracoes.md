@@ -1,5 +1,7 @@
 # Configurações de aparência e conta — desenho para aprovação
 
+> Totais históricos: os números abaixo pertencem às execuções descritas. Para o resultado vigente, consulte [validação atual](validacao-atual.md).
+
 **Desenho aprovado em 16/11/2026 · branch `feature/configuracoes-conta` · implementação e validação em andamento.**
 
 Base do desenho: [levantamento da Fase 1](levantamento-configuracoes.md), código `d4a6bd4`. O usuário confirmou **pt-BR e inglês** e **foto visível ao titular e a colegas com empresa compartilhada**. As seções mantêm o escopo aprovado. O registro de progresso indica quais partes já estão na branch.
@@ -8,20 +10,20 @@ Base do desenho: [levantamento da Fase 1](levantamento-configuracoes.md), códig
 
 Preferências são **pessoais, por usuário**, compartilhadas entre seus workspaces e dispositivos após salvar. Não haverá tema/paleta obrigatório por empresa nesta entrega. Manter a identidade visual atual: Helvetica, superfícies claras/escuras e azul de destaque. Marketing e escolhas de cookies continuam nos fluxos existentes.
 
-| Configuração | Valores propostos | Padrão |
-|---|---|---|
-| Tema | Claro, escuro, sistema | Sistema; importar a escolha atual do rodapé quando ainda não existir preferência explícita da conta |
-| Texto | 100%, 110%, 125% | 100% |
-| Densidade | Confortável, compacta | Confortável; compacta não reduz alvos de toque abaixo de 44 px |
-| Movimento | Seguir sistema, reduzir | Sistema; reduzir é sempre respeitado, inclusive quando solicitado pelo sistema operacional |
-| Contraste | Padrão, alto | Padrão; alto com tokens próprios para ambos os temas, sem remover indicadores de estado |
-| Idioma | Português do Brasil (`pt-BR`), English (`en`) | pt-BR |
-| Formatos | Brasileiro (`pt-BR`) nesta entrega | Data dd/mm/aaaa, hora 24 h, decimal com vírgula; idioma inglês não muda os formatos automaticamente |
-| Fuso | Automático por dispositivo, manual por identificador IANA | Automático |
-| Página inicial do workspace | Fila em lista, fila em Kanban, última visualização | Fila em lista |
-| Visualização da fila | Lista, Kanban | Lista |
-| Nome | Nome de exibição, 1–100 caracteres após trim | Importar metadado válido existente; fallback neutro “Pessoa da equipe” |
-| Foto | Opcional; JPEG, PNG ou WebP até **2 MiB (2.097.152 bytes)** | Sem foto; iniciais e cor estável derivada do nome |
+| Configuração                | Valores propostos                                           | Padrão                                                                                              |
+| --------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Tema                        | Claro, escuro, sistema                                      | Sistema; importar a escolha atual do rodapé quando ainda não existir preferência explícita da conta |
+| Texto                       | 100%, 110%, 125%                                            | 100%                                                                                                |
+| Densidade                   | Confortável, compacta                                       | Confortável; compacta não reduz alvos de toque abaixo de 44 px                                      |
+| Movimento                   | Seguir sistema, reduzir                                     | Sistema; reduzir é sempre respeitado, inclusive quando solicitado pelo sistema operacional          |
+| Contraste                   | Padrão, alto                                                | Padrão; alto com tokens próprios para ambos os temas, sem remover indicadores de estado             |
+| Idioma                      | Português do Brasil (`pt-BR`), English (`en`)               | pt-BR                                                                                               |
+| Formatos                    | Brasileiro (`pt-BR`) nesta entrega                          | Data dd/mm/aaaa, hora 24 h, decimal com vírgula; idioma inglês não muda os formatos automaticamente |
+| Fuso                        | Automático por dispositivo, manual por identificador IANA   | Automático                                                                                          |
+| Página inicial do workspace | Fila em lista, fila em Kanban, última visualização          | Fila em lista                                                                                       |
+| Visualização da fila        | Lista, Kanban                                               | Lista                                                                                               |
+| Nome                        | Nome de exibição, 1–100 caracteres após trim                | Importar metadado válido existente; fallback neutro “Pessoa da equipe”                              |
+| Foto                        | Opcional; JPEG, PNG ou WebP até **2 MiB (2.097.152 bytes)** | Sem foto; iniciais e cor estável derivada do nome                                                   |
 
 Foto final proposta: **256 × 256 px, WebP estático**, máximo 256 KiB depois de reprocessar no servidor. Alterar nome não altera usuário, papel, e-mail nem evidências legais. Não usar foto para biometria ou verificação de identidade.
 
@@ -69,14 +71,14 @@ next-themes continua responsável pelo tema; o novo provider comum controla os d
 
 ## 4. Dados, RLS e versões
 
-| Modelo proposto | Campos principais | Leitura/escrita |
-|---|---|---|
-| `public.profiles` | user_id PK/FK auth.users, display_name, avatar_path anulável, avatar_version, updated_at, version | Titular e colegas com membership real compartilhada leem a projeção mínima; apenas titular altera por comando validado |
-| `public.user_preferences` | user_id PK/FK, theme, text_scale, density, contrast, motion, locale, format_locale, timezone_mode, timezone, home_view, queue_view, flags de notificação, theme_explicit, updated_at, version | Somente o próprio titular lê/altera; sem exceção para administrador geral |
-| `public.user_workspace_preferences` | PK user_id/organization_id, last_view, last_queue_view, updated_at, version | Próprio titular; gravar exige acesso atual ao workspace; sem preferências de terceiros na resposta |
-| `private.avatar_intents` | UUID, titular, caminho aleatório, digest/tamanho do arquivo normalizado, expiração, estado, versão esperada do perfil | Sem SELECT/DML genérico do cliente; comandos autenticados e atestados pelo servidor controlam preparação/finalização |
-| `private.avatar_cleanup_jobs` | ID do objeto/caminho, titular, motivo, tentativas, estado e timestamps | Operação restrita; não expor ao navegador nem a colegas |
-| `private.account_reauth_proofs` | Hash de prova opaca, user_id, sessão verificada, finalidade, expiração/consumo | Sem leitura genérica; uso condicionado ao fluxo de e-mail descrito adiante |
+| Modelo proposto                     | Campos principais                                                                                                                                                                             | Leitura/escrita                                                                                                        |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `public.profiles`                   | user_id PK/FK auth.users, display_name, avatar_path anulável, avatar_version, updated_at, version                                                                                             | Titular e colegas com membership real compartilhada leem a projeção mínima; apenas titular altera por comando validado |
+| `public.user_preferences`           | user_id PK/FK, theme, text_scale, density, contrast, motion, locale, format_locale, timezone_mode, timezone, home_view, queue_view, flags de notificação, theme_explicit, updated_at, version | Somente o próprio titular lê/altera; sem exceção para administrador geral                                              |
+| `public.user_workspace_preferences` | PK user_id/organization_id, last_view, last_queue_view, updated_at, version                                                                                                                   | Próprio titular; gravar exige acesso atual ao workspace; sem preferências de terceiros na resposta                     |
+| `private.avatar_intents`            | UUID, titular, caminho aleatório, digest/tamanho do arquivo normalizado, expiração, estado, versão esperada do perfil                                                                         | Sem SELECT/DML genérico do cliente; comandos autenticados e atestados pelo servidor controlam preparação/finalização   |
+| `private.avatar_cleanup_jobs`       | ID do objeto/caminho, titular, motivo, tentativas, estado e timestamps                                                                                                                        | Operação restrita; não expor ao navegador nem a colegas                                                                |
+| `private.account_reauth_proofs`     | Hash de prova opaca, user_id, sessão verificada, finalidade, expiração/consumo                                                                                                                | Sem leitura genérica; uso condicionado ao fluxo de e-mail descrito adiante                                             |
 
 Perfis e preferências são distintos: ler a foto/nome de uma colega não dá acesso a idioma, fuso ou escolhas privadas dela. RLS usa `auth.uid()` e, para a leitura compartilhada de perfil/foto, **membership real comum em `memberships`**, sem reutilizar `private.role_in` com exceção global. Própria pessoa tem acesso mesmo sem empresa. Usuário sem vínculo comum recebe 404, sem confirmar se existe foto.
 
@@ -136,16 +138,16 @@ Objetos candidatos/órfãos não publicados: expirar em uma hora, com limpeza ag
 
 Rotas de conta independem de empresa para o titular. Resolver usuário por `getUser`, manter cookies HttpOnly/Secure/SameSite e aceite legal conforme a área, sem bloquear direitos do titular por falta de membership. Schemas Zod estritos rejeitam campos extras e valores fora das listas.
 
-| Método/rota | Entrada e resultado |
-|---|---|
-| GET `/api/conta/configuracoes` | Perfil próprio, preferências e versões; sem segredos/URLs persistentes; 200 |
-| PATCH `/api/conta/preferencias` | Patch tipado dos campos permitidos + version; 200 registro atualizado; 409 conflito |
-| PATCH `/api/conta/perfil` | `{displayName,version}`; 200 perfil atualizado; não aceita caminho de foto ou e-mail |
-| POST `/api/conta/foto` | Multipart: arquivo, recorte e versão esperada; 201 apenas após publicar imagem; progresso por XHR/controle acessível |
-| DELETE `/api/conta/foto` | Versão condicional em If-Match; 200 removida ou 202 com limpeza física pendente e status claro; operação repetida não recria foto |
-| GET `/api/perfis/{userId}/foto-url` | Titular/colega; 200 URL assinada curta ou indicação de ausência; 404 para alvo inexistente/invisível |
-| GET `/api/perfis/{userId}/foto` | Query assinada, versão e sessão; bytes após nova checagem; sem cache compartilhado |
-| PUT `/api/empresas/{slug}/minha-visualizacao` | Própria última visão com enum e versão; não altera empresa nem preferências de outro usuário |
+| Método/rota                                   | Entrada e resultado                                                                                                               |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| GET `/api/conta/configuracoes`                | Perfil próprio, preferências e versões; sem segredos/URLs persistentes; 200                                                       |
+| PATCH `/api/conta/preferencias`               | Patch tipado dos campos permitidos + version; 200 registro atualizado; 409 conflito                                               |
+| PATCH `/api/conta/perfil`                     | `{displayName,version}`; 200 perfil atualizado; não aceita caminho de foto ou e-mail                                              |
+| POST `/api/conta/foto`                        | Multipart: arquivo, recorte e versão esperada; 201 apenas após publicar imagem; progresso por XHR/controle acessível              |
+| DELETE `/api/conta/foto`                      | Versão condicional em If-Match; 200 removida ou 202 com limpeza física pendente e status claro; operação repetida não recria foto |
+| GET `/api/perfis/{userId}/foto-url`           | Titular/colega; 200 URL assinada curta ou indicação de ausência; 404 para alvo inexistente/invisível                              |
+| GET `/api/perfis/{userId}/foto`               | Query assinada, versão e sessão; bytes após nova checagem; sem cache compartilhado                                                |
+| PUT `/api/empresas/{slug}/minha-visualizacao` | Própria última visão com enum e versão; não altera empresa nem preferências de outro usuário                                      |
 
 Rotas de e-mail condicionais à capacidade verificada do provedor: POST `/api/conta/reauth` recebe senha atual e emite prova em cookie HttpOnly de uso único; PATCH `/api/conta/email` recebe novo endereço e consome a prova válida para iniciar confirmação. Com flag desligada, não iniciar alteração e responder 409 com código de recurso indisponível. Adicionar limite de cinco tentativas de reautenticação por usuário a cada 15 minutos, além da proteção por origem de rede, sem registrar senha ou prova.
 
@@ -181,17 +183,17 @@ Movimento: preferência reduzir força redução em CSS, Motion, skeletons e di�
 
 Após aprovação, manter a branch própria e dividir commits por responsabilidade: (1) modelo/RLS/defaults/backfill; (2) APIs de perfil/preferências e versões; (3) prova de segurança de foto/Storage, processamento e cleanup; (4) providers/locale/tokens; (5) página e avatar compartilhado; (6) testes, privacidade e operação. Scanner antes de cada commit. Tipos gerados do banco local após migrações; dependências diretas de processamento fixadas e licença/audit revisados.
 
-| Camada | Aceite obrigatório |
-|---|---|
-| Unitários | Nome Unicode/trim/limites; preferências/defaults; fallback de locale; igualdade de chaves; datas dd/mm/aaaa/24 h em fusos diferentes; números; cor/iniciais; recorte e limites de bytes/pixels; EXIF/GPS removidos |
-| SQL/RLS | Própria preferência versus alheia, sem exceção de admin global; colegas de empresa em comum versus outra; perda do último vínculo; manipulação de user_id/avatar_path/versão; CAS de duas gravações |
-| Storage real local | Upload no diretório alheio negado; original sem atestado negado; intenção adulterada/expirada/repetida negada; objeto não publicado invisível; UPDATE/cópia/listagem/assinatura nativa indevidos negados; leitura própria/colega legítima; original sem metadados nunca é publicado |
-| Falhas e compensação | Upload concluído e finalize falhando, concorrência de troca/remoção, delete indisponível, sessão expirada no upload, limpeza retomada; foto anterior preservada até publicação |
-| URLs de foto | URL expirada/tamper/outro viewer/versão antiga negada; revogação de vínculo na próxima leitura; sem cache público e sem persistir URL no banco |
-| E2E desktop/celular | Tema, escala 100/110/125, densidade, contraste, movimento, pt-BR/inglês, nome, upload/troca/remoção, reload/persistência e conflito; perfis reais no Supabase local |
-| Troca de conta/dispositivo | Preferência da conta prevalece; importar tema antigo sem sobrescrever gravação concorrente; logout limpa espelho pessoal; fuso automático pode diferir por dispositivo |
-| Acessibilidade/visual | 390 px e 1440 px em ambos os idiomas/temas/escalas, sem rolagem horizontal; teclado/foco/alt; controles de recorte e retorno de erro |
-| Auth e privacidade | Senha reaproveitada, e-mail não muda sem requisitos completos; direitos sem workspace; exclusão real remove arquivo e dados próprios; cookies/marketing preservados |
+| Camada                     | Aceite obrigatório                                                                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unitários                  | Nome Unicode/trim/limites; preferências/defaults; fallback de locale; igualdade de chaves; datas dd/mm/aaaa/24 h em fusos diferentes; números; cor/iniciais; recorte e limites de bytes/pixels; EXIF/GPS removidos                                                                  |
+| SQL/RLS                    | Própria preferência versus alheia, sem exceção de admin global; colegas de empresa em comum versus outra; perda do último vínculo; manipulação de user_id/avatar_path/versão; CAS de duas gravações                                                                                 |
+| Storage real local         | Upload no diretório alheio negado; original sem atestado negado; intenção adulterada/expirada/repetida negada; objeto não publicado invisível; UPDATE/cópia/listagem/assinatura nativa indevidos negados; leitura própria/colega legítima; original sem metadados nunca é publicado |
+| Falhas e compensação       | Upload concluído e finalize falhando, concorrência de troca/remoção, delete indisponível, sessão expirada no upload, limpeza retomada; foto anterior preservada até publicação                                                                                                      |
+| URLs de foto               | URL expirada/tamper/outro viewer/versão antiga negada; revogação de vínculo na próxima leitura; sem cache público e sem persistir URL no banco                                                                                                                                      |
+| E2E desktop/celular        | Tema, escala 100/110/125, densidade, contraste, movimento, pt-BR/inglês, nome, upload/troca/remoção, reload/persistência e conflito; perfis reais no Supabase local                                                                                                                 |
+| Troca de conta/dispositivo | Preferência da conta prevalece; importar tema antigo sem sobrescrever gravação concorrente; logout limpa espelho pessoal; fuso automático pode diferir por dispositivo                                                                                                              |
+| Acessibilidade/visual      | 390 px e 1440 px em ambos os idiomas/temas/escalas, sem rolagem horizontal; teclado/foco/alt; controles de recorte e retorno de erro                                                                                                                                                |
+| Auth e privacidade         | Senha reaproveitada, e-mail não muda sem requisitos completos; direitos sem workspace; exclusão real remove arquivo e dados próprios; cookies/marketing preservados                                                                                                                 |
 
 As provas específicas de processamento e operações de Storage são bloqueadoras: sem elas não se libera foto nem se usa bucket público como solução provisória. Testes E2E da demonstração recebem simulação claramente identificada, sem fingir que ela comprova RLS ou upload real.
 

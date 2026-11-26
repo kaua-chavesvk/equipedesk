@@ -2,17 +2,17 @@
 
 O esquema só concede leitura filtrada por RLS ao papel `authenticated`. Toda escrita passa por `desk_command(p_slug text, p_action text, p_payload jsonb)`, uma função SECURITY DEFINER com search_path vazio, identidade `auth.uid()` e autorização explícita. Nenhuma chave service role participa das operações comuns. A função retorna JSON. Erros de domínio usam SQLSTATE P0001 com prefixo HTTP (`404:`, `409:` etc.).
 
-| Ação | Payload | Retorno |
-|---|---|---|
-| create_organization | name, slug | id, slug |
-| create_ticket | title, description, priority | linha do chamado |
-| comment | id do chamado, body | id do comentário |
-| transition | id, action (`assign`, `resolve`, `reopen`), version, reason para reabrir | linha do chamado |
-| invite | email, role | id, token, expires_in_days |
-| accept_invite | token | id da empresa, slug |
-| update_member | id do usuário, role | id |
-| remove_member | id do usuário | id |
-| revoke_invite | id do convite | id |
+| Ação                | Payload                                                                  | Retorno                    |
+| ------------------- | ------------------------------------------------------------------------ | -------------------------- |
+| create_organization | name, slug                                                               | id, slug                   |
+| create_ticket       | title, description, priority                                             | linha do chamado           |
+| comment             | id do chamado, body                                                      | id do comentário           |
+| transition          | id, action (`assign`, `resolve`, `reopen`), version, reason para reabrir | linha do chamado           |
+| invite              | email, role                                                              | id, token, expires_in_days |
+| accept_invite       | token                                                                    | id da empresa, slug        |
+| update_member       | id do usuário, role                                                      | id                         |
+| remove_member       | id do usuário                                                            | id                         |
+| revoke_invite       | id do convite                                                            | id                         |
 
 Criação e aceite não usam o slug. Os papéis são `admin`, `agent`, `requester`; estados `open`, `in_progress`, `resolved`; prioridades `low`, `medium`, `high`, `urgent`. Não exponha o token em logs. Retorne o link ao administrador somente no momento de criação; a tabela armazena apenas SHA-256 e a concessão SELECT exclui token_hash.
 

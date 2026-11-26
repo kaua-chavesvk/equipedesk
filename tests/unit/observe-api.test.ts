@@ -8,10 +8,12 @@ it('correlaciona o HTTP 503 sem registrar URL, query, cabeçalhos ou conteúdo d
     const handler = observeApi('/api/privacidade/descadastro', async () =>
       Response.json({ error: 'conteúdo privado' }, { status: 503 }),
     );
-    const response = await handler(new Request('https://desk.example/?token=teste-sigiloso', {
-      method: 'POST',
-      headers: { 'x-request-id': id, authorization: 'Bearer teste-sigiloso' },
-    }));
+    const response = await handler(
+      new Request('https://desk.example/?token=teste-sigiloso', {
+        method: 'POST',
+        headers: { 'x-request-id': id, authorization: 'Bearer teste-sigiloso' },
+      }),
+    );
     expect(response.headers.get('x-request-id')).toBe(id);
     expect(JSON.parse(error.mock.calls[0][0])).toEqual({
       type: 'api_request',

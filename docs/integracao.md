@@ -46,13 +46,13 @@ flowchart LR
 
 Escolha: **outbox transacional no PostgreSQL + consumidor em Edge Function + Resend por API**. Agendamento inicial a cada minuto pelo Supabase Cron; lote de até 25 trabalhos, concorrência limitada. O PostgreSQL já existente mantém a relação entre evento e trabalho, sem criar uma segunda infraestrutura de filas nesta entrega.
 
-| Alternativa | Vantagens | Limitação/decisão |
-|---|---|---|
-| Enviar durante a requisição Next.js | Poucos componentes | Latência e falha externa ficam no caminho do chamado; rejeitada |
-| Disparar tarefa após responder, sem registro durável | Resposta rápida | Encerramento do processo pode perder envio; rejeitada |
-| Polling da tabela de chamados | Menor alteração inicial | Dificulta detectar todos os eventos e deduplicar; rejeitada |
-| Redis como fila | Pode atender volumes maiores | Acrescenta coordenação e persistência; Upstash atual continua no limitador, sem compartilhar responsabilidades nesta etapa |
-| Outbox PostgreSQL e worker | Commit atômico, replay e auditoria | Exige leases, retentativas, limpeza e monitoramento; escolhida |
+| Alternativa                                          | Vantagens                          | Limitação/decisão                                                                                                          |
+| ---------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Enviar durante a requisição Next.js                  | Poucos componentes                 | Latência e falha externa ficam no caminho do chamado; rejeitada                                                            |
+| Disparar tarefa após responder, sem registro durável | Resposta rápida                    | Encerramento do processo pode perder envio; rejeitada                                                                      |
+| Polling da tabela de chamados                        | Menor alteração inicial            | Dificulta detectar todos os eventos e deduplicar; rejeitada                                                                |
+| Redis como fila                                      | Pode atender volumes maiores       | Acrescenta coordenação e persistência; Upstash atual continua no limitador, sem compartilhar responsabilidades nesta etapa |
+| Outbox PostgreSQL e worker                           | Commit atômico, replay e auditoria | Exige leases, retentativas, limpeza e monitoramento; escolhida                                                             |
 
 Auth permanece no **Supabase Auth → SMTP do provedor**. Não será movido para a outbox de chamados: confirmação e recuperação preservam o fluxo e os controles do provedor de identidade. A documentação do Supabase recomenda SMTP próprio para produção e alerta para as restrições do serviço padrão. [Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
 
@@ -60,12 +60,12 @@ Auth permanece no **Supabase Auth → SMTP do provedor**. Não será movido para
 
 O ator de um comando continua sendo `auth.uid()` da sessão. O corpo HTTP nunca escolhe autor, destinatário ou empresa. A configuração da empresa não aceita endereços arbitrários como destinatários de chamados.
 
-| Evento | Destinatários propostos | Exclusões |
-|---|---|---|
-| Chamado criado | Solicitante, como confirmação de recebimento | Sem cópia para todos os agentes/admins; evita fan-out desnecessário |
-| Nova resposta | Solicitante e responsável atual, quando existir | Excluir autor da resposta; deduplicar quando solicitante e responsável coincidirem |
-| Chamado resolvido | Solicitante | Excluir ator da resolução, se for o próprio destinatário |
-| Convite de participação | Endereço normalizado do convite | Convite aceito, revogado, expirado ou empresa desativada para envio não recebe mensagem |
+| Evento                  | Destinatários propostos                         | Exclusões                                                                               |
+| ----------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Chamado criado          | Solicitante, como confirmação de recebimento    | Sem cópia para todos os agentes/admins; evita fan-out desnecessário                     |
+| Nova resposta           | Solicitante e responsável atual, quando existir | Excluir autor da resposta; deduplicar quando solicitante e responsável coincidirem      |
+| Chamado resolvido       | Solicitante                                     | Excluir ator da resolução, se for o próprio destinatário                                |
+| Convite de participação | Endereço normalizado do convite                 | Convite aceito, revogado, expirado ou empresa desativada para envio não recebe mensagem |
 
 Para chamados, o destinatário deve existir no Supabase, ter e-mail confirmado, vínculo atual com a empresa e permissão equivalente à leitura do chamado: solicitante apenas próprio; agente/admin fila da empresa. Privilégio global, sozinho, não assina notificações de todas as empresas. Verificar elegibilidade no enfileiramento **e novamente antes do envio**; não criar destinatários retroativamente depois do evento.
 
@@ -81,16 +81,16 @@ Um envio já entregue ao provedor não pode ser recolhido após revogação de a
 
 Tabelas privadas, sem SELECT/DML genérico para `anon` ou `authenticated`. Todas as relações incluem empresa onde aplicável; integridade composta impede associar evento/chamado de outra empresa.
 
-| Estrutura | Campos e invariantes principais |
-|---|---|
-| `private.email_control` | Linha global e por empresa; modo `off`, `dry_run` ou `live`; `capture_from`; timestamps e ator da alteração. Valores padrão off |
-| `private.email_outbox` | UUID, empresa, tipo, evento/convite de origem, destinatário usuário ou referência do convite, versão de template; UNIQUE por origem/tipo/destinatário/template; estado, tentativas, próxima execução, lease/geração, erro categorizado, provider_id, timestamps |
-| `private.email_payloads` | Payload mínimo imutável e cifrado quando preparado; hash; endereço e versão de template congelados; expiração. Inclui token do convite cifrado quando necessário |
-| `private.email_deliveries` | Identificador do provedor único por ambiente, outbox_id, marcos de aceitação/entrega/falha; nenhum corpo de e-mail |
-| `private.email_webhook_receipts` | UNIQUE por evento assinado do provedor e ambiente; digest do corpo e campos mínimos para aplicar evento; estados de reconciliação |
-| `private.email_suppressions` | Fingerprint HMAC do endereço, categoria bounce/complaint/manual, escopo do ambiente, data; não registrar endereço puro em logs |
-| `private.email_operations` | Mudanças de modo, replay/cancelamento e motivo; ator, empresa, IDs e datas, sem corpos/endereços/tokens |
-| `private.desk_idempotency` | Empresa/escopo, usuário, ação, chave UUID, digest do payload normalizado, resposta original protegida, data/expiração; unicidade por escopo/ator/chave; ação é comparada para detectar reutilização indevida |
+| Estrutura                        | Campos e invariantes principais                                                                                                                                                                                                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `private.email_control`          | Linha global e por empresa; modo `off`, `dry_run` ou `live`; `capture_from`; timestamps e ator da alteração. Valores padrão off                                                                                                                                 |
+| `private.email_outbox`           | UUID, empresa, tipo, evento/convite de origem, destinatário usuário ou referência do convite, versão de template; UNIQUE por origem/tipo/destinatário/template; estado, tentativas, próxima execução, lease/geração, erro categorizado, provider_id, timestamps |
+| `private.email_payloads`         | Payload mínimo imutável e cifrado quando preparado; hash; endereço e versão de template congelados; expiração. Inclui token do convite cifrado quando necessário                                                                                                |
+| `private.email_deliveries`       | Identificador do provedor único por ambiente, outbox_id, marcos de aceitação/entrega/falha; nenhum corpo de e-mail                                                                                                                                              |
+| `private.email_webhook_receipts` | UNIQUE por evento assinado do provedor e ambiente; digest do corpo e campos mínimos para aplicar evento; estados de reconciliação                                                                                                                               |
+| `private.email_suppressions`     | Fingerprint HMAC do endereço, categoria bounce/complaint/manual, escopo do ambiente, data; não registrar endereço puro em logs                                                                                                                                  |
+| `private.email_operations`       | Mudanças de modo, replay/cancelamento e motivo; ator, empresa, IDs e datas, sem corpos/endereços/tokens                                                                                                                                                         |
+| `private.desk_idempotency`       | Empresa/escopo, usuário, ação, chave UUID, digest do payload normalizado, resposta original protegida, data/expiração; unicidade por escopo/ator/chave; ação é comparada para detectar reutilização indevida                                                    |
 
 Nomes finais e tipos serão fixados na migração da Fase 3. Não duplicar o conteúdo do chamado na outbox. Payload congelado contém apenas o necessário para o envio proposto. Convite cifrado usa chave separada em Vault; leitura/decifragem só por função restrita ao consumidor. Falha de obtenção/cifragem antes do commit impede concluir o convite, sem deixá-lo parcialmente criado.
 
@@ -114,12 +114,12 @@ Novo cabeçalho **opcional e recomendado** nas mutações de criação de chamad
 
 ### Novas rotas Next.js
 
-| Rota proposta | Autenticação e permissão | Contrato |
-|---|---|---|
-| GET `/api/empresas/{slug}/integracoes/email` | Sessão, aceite e admin da empresa | 200: modo efetivo, estado de configuração sem segredos, contagens e horário da última tentativa |
-| PATCH na mesma rota | Mesmos controles; CSRF/origem; Zod estrito | `{mode:off|dry_run|live}`; live exige modo global live e pré-requisitos operacionais; 200 ou 409 se implantação não habilitada |
-| GET `/api/empresas/{slug}/integracoes/email/envios` | Admin da empresa | `status?`, `cursor?`, `limit` 1–50, padrão 20; `{data,nextCursor}`. Ordem `(created_at DESC,id DESC)`; cursor validado e aplicado sempre sob escopo da empresa |
-| POST `/api/empresas/{slug}/integracoes/email/envios/{id}/reprocessar` | Admin da empresa, CSRF | `{reason}` de 10–500 caracteres; 202 `{id,status}` para falha segura; não manda e-mail diretamente. Recusa resultado incerto fora da janela de deduplicação, cancelado ou terminal de supressão |
+| Rota proposta                                                         | Autenticação e permissão                   | Contrato                                                                                                                                                                                        |
+| --------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET `/api/empresas/{slug}/integracoes/email`                          | Sessão, aceite e admin da empresa          | 200: modo efetivo, estado de configuração sem segredos, contagens e horário da última tentativa                                                                                                 |
+| PATCH na mesma rota                                                   | Mesmos controles; CSRF/origem; Zod estrito | `{mode:off                                                                                                                                                                                      | dry_run | live}`; live exige modo global live e pré-requisitos operacionais; 200 ou 409 se implantação não habilitada |
+| GET `/api/empresas/{slug}/integracoes/email/envios`                   | Admin da empresa                           | `status?`, `cursor?`, `limit` 1–50, padrão 20; `{data,nextCursor}`. Ordem `(created_at DESC,id DESC)`; cursor validado e aplicado sempre sob escopo da empresa                                  |
+| POST `/api/empresas/{slug}/integracoes/email/envios/{id}/reprocessar` | Admin da empresa, CSRF                     | `{reason}` de 10–500 caracteres; 202 `{id,status}` para falha segura; não manda e-mail diretamente. Recusa resultado incerto fora da janela de deduplicação, cancelado ou terminal de supressão |
 
 UI de diagnóstico mostra evento, estado, tentativas, data e categoria de erro; não endereço completo, tokens ou resposta bruta do provedor. Usuários sem papel administrativo recebem 403 se a empresa for visível; recurso de outra empresa ou ID invisível recebe 404. Respostas privadas no-store, X-Request-Id e logger estruturado em todas as novas rotas.
 
@@ -151,17 +151,17 @@ Webhook usa ID assinado do evento para deduplicar; eventos podem chegar fora de 
 
 ## 7. Mapeamento de campos
 
-| Origem EquipeDesk | Destino/uso | Regra |
-|---|---|---|
-| Evento persistido `id`, `kind`, empresa e chamado | Origem da outbox | Chave composta validada no banco; nenhum corpo de comentário copiado |
-| `requester_id`, `assignee_id`, autor | Seleção de destinatários | Matriz da seção 3, deduplicação e rechecagem de acesso |
-| E-mail confirmado em Auth | `to` do provedor | Resolvido por função restrita; não aceito do navegador para notificações |
-| UUID da outbox + ambiente | Chave idempotente | Não usar título, endereço ou token na chave |
-| Origem canônica + slug + UUID | URL de acesso | HTTPS fixo por ambiente; sem link externo fornecido pelo usuário |
-| `title`, `description`, `comments.body` | Não encaminhados no MVP | Conteúdo permanece no painel |
-| Convite: id, e-mail, role, expiração e token | Template de convite | Token cifrado até envio; validade/revogação rechecadas |
-| Resend `id` | `provider_id` | Único no ambiente; associação interna à empresa |
-| Callback: tipo, ID e timestamp | Recibo/estado de entrega | Assinatura, deduplicação e reconciliação; descartar corpo bruto após processamento |
+| Origem EquipeDesk                                 | Destino/uso              | Regra                                                                              |
+| ------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| Evento persistido `id`, `kind`, empresa e chamado | Origem da outbox         | Chave composta validada no banco; nenhum corpo de comentário copiado               |
+| `requester_id`, `assignee_id`, autor              | Seleção de destinatários | Matriz da seção 3, deduplicação e rechecagem de acesso                             |
+| E-mail confirmado em Auth                         | `to` do provedor         | Resolvido por função restrita; não aceito do navegador para notificações           |
+| UUID da outbox + ambiente                         | Chave idempotente        | Não usar título, endereço ou token na chave                                        |
+| Origem canônica + slug + UUID                     | URL de acesso            | HTTPS fixo por ambiente; sem link externo fornecido pelo usuário                   |
+| `title`, `description`, `comments.body`           | Não encaminhados no MVP  | Conteúdo permanece no painel                                                       |
+| Convite: id, e-mail, role, expiração e token      | Template de convite      | Token cifrado até envio; validade/revogação rechecadas                             |
+| Resend `id`                                       | `provider_id`            | Único no ambiente; associação interna à empresa                                    |
+| Callback: tipo, ID e timestamp                    | Recibo/estado de entrega | Assinatura, deduplicação e reconciliação; descartar corpo bruto após processamento |
 
 ## 8. Dados pessoais e privacidade
 
@@ -183,14 +183,14 @@ Retenção técnica proposta, sujeita à revisão do controlador:
 
 Homologação usa projeto Supabase, credenciais Resend e subdomínio remetente separados de produção. Prévia Vercel deve usar origem estável de homologação compatível com CSRF/callback. Allowlist de destinatários de teste é obrigatória mesmo em modo live de homologação; impedir que uma cópia de dados reais dispare mensagens. Sem fallback para configuração de produção.
 
-| Configuração proposta | Local |
-|---|---|
-| URL/chave pública Supabase e origem canônica | Next.js, sem chave administrativa |
-| Resend API key com menor escopo de envio disponível, remetente verificado, ambiente e limite | Segredos da função de envio |
-| Credencial Postgres da role restrita e chave de autenticação do dispatch | Função de envio; segredo de chamada no Vault do Cron |
-| Segredo de assinatura Resend e credencial da role de ingestão | Função de webhook |
-| Chave de cifragem/fingerprint, allowlist de homologação | Vault/worker, conforme uso; nunca NEXT_PUBLIC |
-| Credenciais SMTP e templates de Auth | Configuração do Supabase Auth por ambiente |
+| Configuração proposta                                                                        | Local                                                |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| URL/chave pública Supabase e origem canônica                                                 | Next.js, sem chave administrativa                    |
+| Resend API key com menor escopo de envio disponível, remetente verificado, ambiente e limite | Segredos da função de envio                          |
+| Credencial Postgres da role restrita e chave de autenticação do dispatch                     | Função de envio; segredo de chamada no Vault do Cron |
+| Segredo de assinatura Resend e credencial da role de ingestão                                | Função de webhook                                    |
+| Chave de cifragem/fingerprint, allowlist de homologação                                      | Vault/worker, conforme uso; nunca NEXT_PUBLIC        |
+| Credenciais SMTP e templates de Auth                                                         | Configuração do Supabase Auth por ambiente           |
 
 SPF/DKIM conforme instruções do provedor e DMARC alinhado ao domínio aprovado; desativar tracking dos links de Auth. O domínio `vercel.app` não concede propriedade de um domínio remetente. É necessário domínio próprio com acesso ao DNS. [Domínios verificados Resend](https://resend.com/docs/dashboard/domains/introduction).
 
@@ -202,17 +202,17 @@ Operações futuras, por RPC restrita e interface/CLI administrativo: consultar 
 
 Após aprovação, branch `feature/integracao-email`. Commits propostos: (1) migração de outbox/ACL/idempotência; (2) contratos Zod e APIs/controle; (3) worker e templates; (4) webhook/entrega/supressão; (5) UI de diagnóstico e testes; (6) documentação e evidências. Scanner de segredos antes de cada commit. Implementação SQL revisada para preservar ordem de locks e último administrador; correções de 503 e pt-BR entram em commits próprios.
 
-| Camada | Casos de aceite |
-|---|---|
-| Vitest | Matriz de destinatários, escape/template, validações pt-BR, digest e chaves, plano de retry, limite de 23 h, estado fora de ordem e modos |
-| SQL com Supabase local | RLS/ACL das novas estruturas e RPCs, negação entre empresas, solicitante sem controle admin, inserção atômica de evento/outbox, rollback integral, chave repetida com payload diferente |
-| Concorrência | Dois envios HTTP com mesma chave: um chamado/evento; duas transições na mesma versão: um sucesso e um 409; dois workers: claim exclusivo; lease antigo não confirma novo lease |
-| Playwright com banco real local | Login/aceite, criação/resposta/resolução, gestão de flags com papéis distintos e diagnóstico sem dados de outra empresa; adaptador fake do provedor com assert da outbox |
-| Falhas controladas | Rede, timeout depois de aceitação, 429, 5xx, domínio/chave inválida, quota, crash após envio e antes de gravar resultado; pausa superior a 24 h sem retry automático |
-| Webhook | Assinatura ausente/inválida, corpo alterado, timestamp fora da janela, duplicado, desconhecido, fora de ordem e callback antes do registro do provider_id; recibo persistido antes de 204 |
-| Privacidade/autorização | Remoção de membro, troca de papel/endereço, troca de responsável, convite revogado/expirado durante espera, supressão e logs sem segredos |
-| Auth em homologação | Confirmação/recuperação em caixa real autorizada, callback no ambiente correto, token expirado/reutilizado, erro de SMTP sem falso sucesso operacional |
-| Preview | Suíte compatível com servidor de produção em URL estável e banco de homologação; falhas injetadas somente no ambiente de teste, sem reutilizar produção |
+| Camada                          | Casos de aceite                                                                                                                                                                           |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vitest                          | Matriz de destinatários, escape/template, validações pt-BR, digest e chaves, plano de retry, limite de 23 h, estado fora de ordem e modos                                                 |
+| SQL com Supabase local          | RLS/ACL das novas estruturas e RPCs, negação entre empresas, solicitante sem controle admin, inserção atômica de evento/outbox, rollback integral, chave repetida com payload diferente   |
+| Concorrência                    | Dois envios HTTP com mesma chave: um chamado/evento; duas transições na mesma versão: um sucesso e um 409; dois workers: claim exclusivo; lease antigo não confirma novo lease            |
+| Playwright com banco real local | Login/aceite, criação/resposta/resolução, gestão de flags com papéis distintos e diagnóstico sem dados de outra empresa; adaptador fake do provedor com assert da outbox                  |
+| Falhas controladas              | Rede, timeout depois de aceitação, 429, 5xx, domínio/chave inválida, quota, crash após envio e antes de gravar resultado; pausa superior a 24 h sem retry automático                      |
+| Webhook                         | Assinatura ausente/inválida, corpo alterado, timestamp fora da janela, duplicado, desconhecido, fora de ordem e callback antes do registro do provider_id; recibo persistido antes de 204 |
+| Privacidade/autorização         | Remoção de membro, troca de papel/endereço, troca de responsável, convite revogado/expirado durante espera, supressão e logs sem segredos                                                 |
+| Auth em homologação             | Confirmação/recuperação em caixa real autorizada, callback no ambiente correto, token expirado/reutilizado, erro de SMTP sem falso sucesso operacional                                    |
+| Preview                         | Suíte compatível com servidor de produção em URL estável e banco de homologação; falhas injetadas somente no ambiente de teste, sem reutilizar produção                                   |
 
 O teste de envio real é controlado, para destinatário autorizado. Testes automatizados usam Mailpit/fake e credenciais sintéticas; nenhum teste envia e-mail para usuários reais por padrão. Sucesso do fake não comprova entrega real. E-mail aceito/entregue pelo provedor não comprova leitura ou inbox sem spam.
 

@@ -19,35 +19,35 @@ Foram lidos `AGENTS.md`, `README.md`, `docs/architecture.md`, `docs/tasks.md`, `
 
 Documentação da versão instalada consultada: `node_modules/next/dist/docs/01-app/02-guides/internationalization.md` e a referência de `Image`, em especial o aviso sobre imagens autenticadas e o loader padrão.
 
-| Verificação realizada | Resultado observado |
-|---|---|
-| `git status --short` inicial | Havia mudanças documentais anteriores: `docs/progress.md`, `docs/descoberta-integracao.md` e `docs/integracao.md`; preservadas |
-| `git switch -c feature/configuracoes-conta` | Branch criada; sem commit/push |
-| Busca de tabelas/políticas de perfis e Storage nas seis migrações e tipos | Não há tabela de perfis, bucket de fotos nem política de Storage declarados no projeto |
-| Busca de `.storage`, `createSignedUrl`, upload e caminhos de avatar em `src` | Nenhum fluxo de foto/Storage implementado encontrado |
-| Inspeção de `ui-providers.tsx` e do pacote next-themes instalado | Tema com classe no HTML, padrão sistema, chave local padrão `theme`; sem persistência por conta |
-| Busca de infraestrutura de locale/dicionários e dependências | Não há dicionários, provider de locale ou biblioteca de internacionalização configurada |
-| Busca de `desk_cookie_choice` em `src`/testes | Endpoint escreve cookie; página legal o descreve; nenhum leitor funcional da escolha no código da interface atual foi encontrado |
-| `pnpm why sharp` | Sharp 0.35.5 existe como dependência transitiva do Next.js, sem pipeline de avatar ou dependência direta do produto |
+| Verificação realizada                                                        | Resultado observado                                                                                                              |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `git status --short` inicial                                                 | Havia mudanças documentais anteriores: `docs/progress.md`, `docs/descoberta-integracao.md` e `docs/integracao.md`; preservadas   |
+| `git switch -c feature/configuracoes-conta`                                  | Branch criada; sem commit/push                                                                                                   |
+| Busca de tabelas/políticas de perfis e Storage nas seis migrações e tipos    | Não há tabela de perfis, bucket de fotos nem política de Storage declarados no projeto                                           |
+| Busca de `.storage`, `createSignedUrl`, upload e caminhos de avatar em `src` | Nenhum fluxo de foto/Storage implementado encontrado                                                                             |
+| Inspeção de `ui-providers.tsx` e do pacote next-themes instalado             | Tema com classe no HTML, padrão sistema, chave local padrão `theme`; sem persistência por conta                                  |
+| Busca de infraestrutura de locale/dicionários e dependências                 | Não há dicionários, provider de locale ou biblioteca de internacionalização configurada                                          |
+| Busca de `desk_cookie_choice` em `src`/testes                                | Endpoint escreve cookie; página legal o descreve; nenhum leitor funcional da escolha no código da interface atual foi encontrado |
+| `pnpm why sharp`                                                             | Sharp 0.35.5 existe como dependência transitiva do Next.js, sem pipeline de avatar ou dependência direta do produto              |
 
 Esta fase é inspeção estática e documentação. Não foram executados novos lint, tipos, testes, build, SQL, E2E ou inspeções visuais de 390/1440 px para esta frente. A presença de testes anteriores não comprova as novas configurações. Não foram consultados buckets/políticas do Supabase hospedado: a ausência local não prova ausência de um recurso manual no provedor.
 
 ## 3. Estado atual e lacunas
 
-| Área | O que existe | O que falta |
-|---|---|---|
-| Tema | next-themes; claro, escuro e sistema; seletor no rodapé; escolha no navegador | Configurações autenticadas, persistência por conta, precedência entre conta/navegador e tratamento na troca de usuário |
-| Cores e fontes | CSS global com tokens claros/escuros; Helvetica; Tailwind 4 importado | Escala única de texto, densidade e alto contraste configuráveis |
-| Movimento | MotionConfig/reduced motion e media queries CSS | Escolha manual e aplicação consistente entre CSS, Motion e componentes |
-| Idioma | HTML pt-BR e textos predominantemente literais em português | Tradução completa pt-BR/inglês, locale persistido, erros traduzíveis e regras de fallback |
-| Datas/números | Uso localizado de `toLocaleDateString`/`toLocaleString('pt-BR')` | Serviço comum de formatos e fuso; política de SSR/hidratação; não há fluxo monetário no produto |
-| Nome | Metadado `auth.user_metadata.name`; campo opcional no cadastro | Tabela de perfis, edição autenticada e identificação dos demais membros |
-| Foto | Iniciais e classes de avatar | Bucket privado, RLS, normalização, URLs temporárias, remoção, versionamento e integração com todos os locais |
-| Preferências pessoais | Marketing no banco e tema local | Tabela privada do usuário para preferências de aparência/uso; fila e home persistidas |
-| Cookies | Endpoint e cookie necessário versionado; sem trackers ativos | Leitura/apresentação coerente da escolha atual, reutilizando a lógica existente |
-| Marketing | Preferência com RLS e revogação na central de dados | Apenas acesso contextual pela futura configuração; não duplicar tabelas ou comando |
-| E-mail/senha | Recuperação e alteração de senha existentes | Troca de e-mail com reautenticação/confirmação; validar entrega no ambiente hospedado |
-| Exclusão | Pedido de direitos com protocolo, atendimento administrativo | Orquestração de remoção de arquivos e perfis quando a exclusão for efetivamente atendida |
+| Área                  | O que existe                                                                  | O que falta                                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Tema                  | next-themes; claro, escuro e sistema; seletor no rodapé; escolha no navegador | Configurações autenticadas, persistência por conta, precedência entre conta/navegador e tratamento na troca de usuário |
+| Cores e fontes        | CSS global com tokens claros/escuros; Helvetica; Tailwind 4 importado         | Escala única de texto, densidade e alto contraste configuráveis                                                        |
+| Movimento             | MotionConfig/reduced motion e media queries CSS                               | Escolha manual e aplicação consistente entre CSS, Motion e componentes                                                 |
+| Idioma                | HTML pt-BR e textos predominantemente literais em português                   | Tradução completa pt-BR/inglês, locale persistido, erros traduzíveis e regras de fallback                              |
+| Datas/números         | Uso localizado de `toLocaleDateString`/`toLocaleString('pt-BR')`              | Serviço comum de formatos e fuso; política de SSR/hidratação; não há fluxo monetário no produto                        |
+| Nome                  | Metadado `auth.user_metadata.name`; campo opcional no cadastro                | Tabela de perfis, edição autenticada e identificação dos demais membros                                                |
+| Foto                  | Iniciais e classes de avatar                                                  | Bucket privado, RLS, normalização, URLs temporárias, remoção, versionamento e integração com todos os locais           |
+| Preferências pessoais | Marketing no banco e tema local                                               | Tabela privada do usuário para preferências de aparência/uso; fila e home persistidas                                  |
+| Cookies               | Endpoint e cookie necessário versionado; sem trackers ativos                  | Leitura/apresentação coerente da escolha atual, reutilizando a lógica existente                                        |
+| Marketing             | Preferência com RLS e revogação na central de dados                           | Apenas acesso contextual pela futura configuração; não duplicar tabelas ou comando                                     |
+| E-mail/senha          | Recuperação e alteração de senha existentes                                   | Troca de e-mail com reautenticação/confirmação; validar entrega no ambiente hospedado                                  |
+| Exclusão              | Pedido de direitos com protocolo, atendimento administrativo                  | Orquestração de remoção de arquivos e perfis quando a exclusão for efetivamente atendida                               |
 
 ## 4. Perfis, nomes e visibilidade
 
@@ -61,17 +61,17 @@ Esta fase é inspeção estática e documentação. Não foram executados novos 
 
 ### Inventário dos pontos de exibição
 
-| Local | Código/origem atual | Situação para nome/foto |
-|---|---|---|
-| Cabeçalho do workspace | `workspace.tsx`, `initials(data.user.name)` | Mostra iniciais da própria pessoa; sem foto |
-| Rodapé da barra lateral | Mesmo componente; nome, papel e iniciais | Deve refletir edição do perfil e manter papel vindo da autorização |
-| Responsável na lista de chamados | `memberName(assignee_id)` e avatar com `initials(...)` | Nome real de terceiros ainda ausente; cor depende do índice da linha |
-| Kanban | `ticket-board.tsx` recebe função de nome do responsável | Texto sem avatar; exige decisão de consistência no desenho |
-| Detalhes do chamado | `memberName` para solicitante e responsável | Apenas texto; considerar perfil sem ampliar acesso ao chamado |
-| Comentários | `author_name` da demonstração ou `memberName(author_id)` | Nome sem foto; nomes de terceiros podem ser genéricos |
-| Eventos da linha do tempo | Rótulo da ação e motivo/data; ícone de relógio | `actor_id` existe nos dados, mas ator/nome/foto não são mostrados na renderização atual |
-| Lista de membros | `memberName`, iniciais e classes `color-${i%4}` | Nomes reais/fotos dependem do perfil; cor varia com ordenação |
-| Resumo dos próprios dados | `/api/privacidade` | Nome ainda vem dos metadados; integrar perfil quando ele passar a ser a origem de exibição |
+| Local                            | Código/origem atual                                      | Situação para nome/foto                                                                    |
+| -------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Cabeçalho do workspace           | `workspace.tsx`, `initials(data.user.name)`              | Mostra iniciais da própria pessoa; sem foto                                                |
+| Rodapé da barra lateral          | Mesmo componente; nome, papel e iniciais                 | Deve refletir edição do perfil e manter papel vindo da autorização                         |
+| Responsável na lista de chamados | `memberName(assignee_id)` e avatar com `initials(...)`   | Nome real de terceiros ainda ausente; cor depende do índice da linha                       |
+| Kanban                           | `ticket-board.tsx` recebe função de nome do responsável  | Texto sem avatar; exige decisão de consistência no desenho                                 |
+| Detalhes do chamado              | `memberName` para solicitante e responsável              | Apenas texto; considerar perfil sem ampliar acesso ao chamado                              |
+| Comentários                      | `author_name` da demonstração ou `memberName(author_id)` | Nome sem foto; nomes de terceiros podem ser genéricos                                      |
+| Eventos da linha do tempo        | Rótulo da ação e motivo/data; ícone de relógio           | `actor_id` existe nos dados, mas ator/nome/foto não são mostrados na renderização atual    |
+| Lista de membros                 | `memberName`, iniciais e classes `color-${i%4}`          | Nomes reais/fotos dependem do perfil; cor varia com ordenação                              |
+| Resumo dos próprios dados        | `/api/privacidade`                                       | Nome ainda vem dos metadados; integrar perfil quando ele passar a ser a origem de exibição |
 
 A função `initials` e as cores não formam um componente único de avatar. Será necessário padronizar nome, iniciais, cor estável e imagem em um lugar compartilhado. A mudança de nome deve atualizar sua apresentação atual sem reescrever o histórico de autoria. O tratamento de membros removidos e autores históricos precisa de fallback, respeitando a visibilidade autorizada.
 
@@ -112,16 +112,16 @@ O processo atual de privacidade recebe um pedido e permite responder após atend
 
 ## 6. Tema, cores, escala e movimento
 
-| Responsabilidade | Arquivo/local |
-|---|---|
-| ThemeProvider e seletor | `src/components/ui-providers.tsx`: classe em html, defaultTheme sistema, nonce CSP, useTheme/setTheme; seletor protegido contra divergência de hidratação |
-| Rodapé | `src/components/cookie-consent.tsx`: `LegalFooter`, links legais e `ThemeSelect`; apesar do nome do arquivo, não é banner de consentimento |
-| Montagem global | `src/app/layout.tsx`: lê nonce, monta providers e rodapé; HTML pt-BR fixo e suppressHydrationWarning |
-| Tokens claros | `src/app/globals.css`, `:root`: accent #002FA7, ink #202126, muted #61636E, canvas #F7F7F8, surface branco e controles/divisórias |
-| Tokens escuros | Mesmo CSS, `.dark`: accent #9AB7FF, ink #EEF0F6, canvas #131721, surface #1B202C e variantes |
-| Tipografia | CSS global, Helvetica Neue/Helvetica/Arial, body 15 px, entrelinha 1.6; fontes de controles 16 px e muitos tamanhos por componente em px |
-| Tailwind | `@import "tailwindcss"` no CSS, plugin `@tailwindcss/postcss` em `postcss.config.mjs`; sem arquivo tailwind.config ou bloco @theme específico do produto encontrado |
-| Movimento | MotionConfig reducedMotion=user; Entrance/DeskDialog usam useReducedMotion; CSS com prefers-reduced-motion, inclusive skeletons |
+| Responsabilidade        | Arquivo/local                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ThemeProvider e seletor | `src/components/ui-providers.tsx`: classe em html, defaultTheme sistema, nonce CSP, useTheme/setTheme; seletor protegido contra divergência de hidratação           |
+| Rodapé                  | `src/components/cookie-consent.tsx`: `LegalFooter`, links legais e `ThemeSelect`; apesar do nome do arquivo, não é banner de consentimento                          |
+| Montagem global         | `src/app/layout.tsx`: lê nonce, monta providers e rodapé; HTML pt-BR fixo e suppressHydrationWarning                                                                |
+| Tokens claros           | `src/app/globals.css`, `:root`: accent #002FA7, ink #202126, muted #61636E, canvas #F7F7F8, surface branco e controles/divisórias                                   |
+| Tokens escuros          | Mesmo CSS, `.dark`: accent #9AB7FF, ink #EEF0F6, canvas #131721, surface #1B202C e variantes                                                                        |
+| Tipografia              | CSS global, Helvetica Neue/Helvetica/Arial, body 15 px, entrelinha 1.6; fontes de controles 16 px e muitos tamanhos por componente em px                            |
+| Tailwind                | `@import "tailwindcss"` no CSS, plugin `@tailwindcss/postcss` em `postcss.config.mjs`; sem arquivo tailwind.config ou bloco @theme específico do produto encontrado |
+| Movimento               | MotionConfig reducedMotion=user; Entrance/DeskDialog usam useReducedMotion; CSS com prefers-reduced-motion, inclusive skeletons                                     |
 
 O next-themes instalado usa chave padrão **`theme` no localStorage**, confirmada na implementação do pacote, pois a aplicação não passa storageKey. O script inicial usa nonce e aplica o tema antes da hidratação. Não há cookie de tema ou registro por usuário. Trocar de conta no mesmo navegador mantém a escolha local; ela nunca concede permissões.
 
@@ -146,15 +146,15 @@ Atualmente `workspace.tsx` formata datas como dia e mês abreviado em pt-BR; `pr
 
 ## 8. Cookies, marketing e preferências de uso
 
-| Preferência | Armazenamento e leitura atuais | Integração necessária |
-|---|---|---|
-| Tema | localStorage `theme`, lido por next-themes | Preservar escolha e definir precedência/migração ao perfil da conta |
-| Cookies opcionais | POST `/api/consentimento/cookies` grava `desk_cookie_choice` como `versão:allow` ou `versão:reject`, 180 dias, HttpOnly/SameSite=Lax/Secure em produção | Não há leitor funcional da escolha nem seletor de cookies atual encontrado. Há seção informativa `/privacidade#cookies`; reutilizar endpoint e adicionar leitura/controle somente no desenho aprovado |
-| Marketing | `public.privacy_preferences`: user_id, marketing, unsubscribe_hash, updated_at; RLS de leitura do próprio usuário e escrita por `privacy_command` | `/api/privacidade` lê; `PrivacyCenter` permite autorizar/revogar. Link por token usa `/api/privacidade/descadastro`; nova página deve reaproveitar esses comandos |
-| Fila Lista/Kanban | `useState(false)` em Workspace | Seleção volta para Lista quando o componente é remontado; não há persistência por conta |
-| Busca/filtros/página | URL e estado local, consultas paginadas | Preservar links explícitos; definir precedência frente a defaults pessoais |
-| Home/última visualização | Sem preferência persistente | Exige validação de destino interno e cuidado na troca de empresa/conta; manter helper safeRedirect |
-| Notificações | Toasts de ações locais; sem configuração de eventos por pessoa | Preferência salva não pode anunciar recebimento de avisos se não houver consumidor implementado |
+| Preferência              | Armazenamento e leitura atuais                                                                                                                          | Integração necessária                                                                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tema                     | localStorage `theme`, lido por next-themes                                                                                                              | Preservar escolha e definir precedência/migração ao perfil da conta                                                                                                                                   |
+| Cookies opcionais        | POST `/api/consentimento/cookies` grava `desk_cookie_choice` como `versão:allow` ou `versão:reject`, 180 dias, HttpOnly/SameSite=Lax/Secure em produção | Não há leitor funcional da escolha nem seletor de cookies atual encontrado. Há seção informativa `/privacidade#cookies`; reutilizar endpoint e adicionar leitura/controle somente no desenho aprovado |
+| Marketing                | `public.privacy_preferences`: user_id, marketing, unsubscribe_hash, updated_at; RLS de leitura do próprio usuário e escrita por `privacy_command`       | `/api/privacidade` lê; `PrivacyCenter` permite autorizar/revogar. Link por token usa `/api/privacidade/descadastro`; nova página deve reaproveitar esses comandos                                     |
+| Fila Lista/Kanban        | `useState(false)` em Workspace                                                                                                                          | Seleção volta para Lista quando o componente é remontado; não há persistência por conta                                                                                                               |
+| Busca/filtros/página     | URL e estado local, consultas paginadas                                                                                                                 | Preservar links explícitos; definir precedência frente a defaults pessoais                                                                                                                            |
+| Home/última visualização | Sem preferência persistente                                                                                                                             | Exige validação de destino interno e cuidado na troca de empresa/conta; manter helper safeRedirect                                                                                                    |
+| Notificações             | Toasts de ações locais; sem configuração de eventos por pessoa                                                                                          | Preferência salva não pode anunciar recebimento de avisos se não houver consumidor implementado                                                                                                       |
 
 O teste existente em `journey.spec.ts` verifica que o fluxo atual não cria `desk_cookie_choice` desnecessariamente. `docs/privacy-operations.md` e trechos do README ainda mencionam banner/escolha de cookies anterior; registrar e consolidar essa divergência sem reinstalar trackers ou popup artificial.
 
@@ -172,20 +172,20 @@ A própria pessoa deve continuar podendo remover sua foto e exercer seus direito
 
 ## 10. Riscos prioritários e dependências
 
-| Prioridade | Risco/dependência | Consequência para a próxima fase |
-|---|---|---|
-| Alta | Não existem perfis ou Storage no modelo do projeto | Migração, tipos, bucket privado e políticas entram no escopo, não apenas UI |
-| Alta | Administrador geral tem acesso efetivo a todas as empresas | Política de foto precisa de membership compartilhada real, sem herdar essa exceção |
-| Alta | Upload é bloqueado globalmente e pode contornar sanitização se feito direto no Storage | Desenhar limite específico e finalização verificada, mantendo a sessão/RLS e bloqueio de originais não normalizados |
-| Alta | Foto, perfil e exclusão usam serviços distintos | Compensação, cleanup e testes de falhas; cascata SQL não elimina o arquivo |
-| Alta | URL assinada continua válida por sua janela | TTL curto, armazenamento privado e política explícita de revogação/cache |
-| Média | CSP/img e otimização atual não preveem imagem privada externa | Definir entrega e cache antes de inserir avatares em telas |
-| Média | Nome de terceiros é genérico no fluxo real | Integrar perfis a membros/autores/responsáveis e fallback de histórico, sem carregar Auth admin |
-| Média | Idiomas exigem revisar muitas strings/erros/formatos | Planejar extração/tradução e SSR; não limitar inglês à página de configurações |
-| Média | Texto usa tamanhos em px e paleta manual | Escala de texto e contraste exigem revisão visual real nos dois temas e idiomas |
-| Média | Tema local e cookies têm escopos diferentes da conta | Definir prioridades na troca de conta/dispositivo e migração sem perder escolha atual |
-| Média | Documentos legais são versionados | Revisar finalidade de foto, visibilidade, retenção e remoção antes de coletar; não sobrescrever versões já aceitas |
-| Operacional | Ambiente hospedado/bucket não inspecionado | Confirmar recursos e políticas em homologação separada antes do preview/piloto |
+| Prioridade  | Risco/dependência                                                                      | Consequência para a próxima fase                                                                                    |
+| ----------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Alta        | Não existem perfis ou Storage no modelo do projeto                                     | Migração, tipos, bucket privado e políticas entram no escopo, não apenas UI                                         |
+| Alta        | Administrador geral tem acesso efetivo a todas as empresas                             | Política de foto precisa de membership compartilhada real, sem herdar essa exceção                                  |
+| Alta        | Upload é bloqueado globalmente e pode contornar sanitização se feito direto no Storage | Desenhar limite específico e finalização verificada, mantendo a sessão/RLS e bloqueio de originais não normalizados |
+| Alta        | Foto, perfil e exclusão usam serviços distintos                                        | Compensação, cleanup e testes de falhas; cascata SQL não elimina o arquivo                                          |
+| Alta        | URL assinada continua válida por sua janela                                            | TTL curto, armazenamento privado e política explícita de revogação/cache                                            |
+| Média       | CSP/img e otimização atual não preveem imagem privada externa                          | Definir entrega e cache antes de inserir avatares em telas                                                          |
+| Média       | Nome de terceiros é genérico no fluxo real                                             | Integrar perfis a membros/autores/responsáveis e fallback de histórico, sem carregar Auth admin                     |
+| Média       | Idiomas exigem revisar muitas strings/erros/formatos                                   | Planejar extração/tradução e SSR; não limitar inglês à página de configurações                                      |
+| Média       | Texto usa tamanhos em px e paleta manual                                               | Escala de texto e contraste exigem revisão visual real nos dois temas e idiomas                                     |
+| Média       | Tema local e cookies têm escopos diferentes da conta                                   | Definir prioridades na troca de conta/dispositivo e migração sem perder escolha atual                               |
+| Média       | Documentos legais são versionados                                                      | Revisar finalidade de foto, visibilidade, retenção e remoção antes de coletar; não sobrescrever versões já aceitas  |
+| Operacional | Ambiente hospedado/bucket não inspecionado                                             | Confirmar recursos e políticas em homologação separada antes do preview/piloto                                      |
 
 ## 11. Arquivos e conclusão da fase
 

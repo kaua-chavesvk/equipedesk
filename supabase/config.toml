@@ -31,6 +31,10 @@ jwt_expiry = 3600
 minimum_password_length = 8
 enable_signup = true
 
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
 [auth.email]
 enable_signup = true
 enable_confirmations = true
